@@ -1,4 +1,4 @@
-const RASA_URL = 'http://localhost:5005';
+const RASA_URL = 'https://daren-plumular-monet.ngrok-free.dev';
 
 const getSessionId = () => {
   // genereaza session_id nou la fiecare incarcare a paginii

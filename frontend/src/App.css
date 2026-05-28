@@ -1,0 +1,88 @@
+/* ════════════════════════════════════════════════════════════
+   FILE 5: src/App.css
+   ════════════════════════════════════════════════════════════ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #f1f5f9;
+}
+
+.app-root {
+  min-height: 100vh;
+  background: #f1f5f9;
+}
+
+.app-main {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ── Grid responsive ─────────────────────────────────────── */
+
+/* Default: 5 coloane (desktop mare) */
+.app-main > div > div[style*="grid"] {
+  grid-template-columns: repeat(5, 1fr) !important;
+}
+
+@media (max-width: 1200px) {
+  .app-main > div > div[style*="grid"] {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .app-main > div > div[style*="grid"] {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .app-main > div > div[style*="grid"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    padding: 12px !important;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .app-main > div > div[style*="grid"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Header responsive ───────────────────────────────────── */
+@media (max-width: 600px) {
+  .header-categories {
+    display: none !important;
+  }
+}
+
+/* ── Animatii ────────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Scrollbar ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+/* ── Hover effects ───────────────────────────────────────── */
+button:hover { opacity: 0.88; }
+
+input:focus {
+  border-color: #1a56db !important;
+  box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.15);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

@@ -1,0 +1,157 @@
+version: "3.1"
+
+stories:
+
+- story: tracking complet
+  steps:
+    - intent: greet
+    - action: utter_greet
+    - intent: track_order
+    - action: order_form
+    - active_loop: order_form
+    - active_loop: null
+    - action: action_track_order
+
+- story: retur complet
+  steps:
+    - intent: greet
+    - action: utter_greet
+    - intent: return_request
+    - action: return_form
+    - active_loop: return_form
+    - active_loop: null
+    - action: action_initiate_return
+
+- story: problema livrare
+  steps:
+    - intent: delivery_problem
+    - action: action_delivery_help
+
+- story: problema livrare escaladare
+  steps:
+    - intent: delivery_problem
+    - action: action_delivery_help
+    - intent: contact_human
+    - action: action_escalate
+
+- story: problema plata
+  steps:
+    - intent: payment_issue
+    - action: action_payment_help
+
+- story: garantie
+  steps:
+    - intent: warranty_info
+    - action: action_warranty_info
+
+- story: out of scope
+  steps:
+    - intent: out_of_scope
+    - action: utter_out_of_scope
+
+- story: la revedere
+  steps:
+    - intent: farewell
+    - action: utter_farewell
+
+- story: follow-up dupa tracking
+  steps:
+    - intent: track_order
+    - action: order_form
+    - active_loop: order_form
+    - active_loop: null
+    - action: action_track_order
+    - intent: delivery_problem
+    - action: action_delivery_help
+
+- story: follow-up retur dupa tracking
+  steps:
+    - intent: track_order
+    - action: order_form
+    - active_loop: order_form
+    - active_loop: null
+    - action: action_track_order
+    - intent: return_request
+    - action: return_form
+    - active_loop: return_form
+    - active_loop: null
+    - action: action_initiate_return
+
+- story: tracking urmat de problema livrare
+  steps:
+    - intent: track_order
+    - action: order_form
+    - active_loop: order_form
+    - active_loop: null
+    - action: action_track_order
+    - intent: delivery_problem
+    - action: action_delivery_help
+    - intent: contact_human
+    - action: action_escalate
+
+- story: tracking urmat de retur
+  steps:
+    - intent: track_order
+    - action: order_form
+    - active_loop: order_form
+    - active_loop: null
+    - action: action_track_order
+    - intent: return_request
+    - action: return_form
+    - active_loop: return_form
+    - active_loop: null
+    - action: action_initiate_return
+
+- story: tracking urmat de problema livrare
+  steps:
+    - intent: track_order
+    - action: order_form
+    - active_loop: order_form
+    - active_loop: null
+    - action: action_track_order
+    - intent: delivery_problem
+    - action: action_delivery_help
+
+- story: tracking urmat de retur
+  steps:
+    - intent: track_order
+    - action: order_form
+    - active_loop: order_form
+    - active_loop: null
+    - action: action_track_order
+    - intent: return_request
+    - action: return_form
+    - active_loop: return_form
+    - active_loop: null
+    - action: action_initiate_return
+
+- story: tracking urmat de escaladare
+  steps:
+    - intent: track_order
+    - action: order_form
+    - active_loop: order_form
+    - active_loop: null
+    - action: action_track_order
+    - intent: contact_human
+    - action: action_escalate
+
+- story: anulare comanda
+  steps:
+    - intent: cancel_order
+    - action: cancel_form
+    - active_loop: cancel_form
+    - active_loop: null
+    - action: action_cancel_order
+
+- story: tracking urmat de anulare
+  steps:
+    - intent: track_order
+    - action: order_form
+    - active_loop: order_form
+    - active_loop: null
+    - action: action_track_order
+    - intent: cancel_order
+    - action: cancel_form
+    - active_loop: cancel_form
+    - active_loop: null
+    - action: action_cancel_order

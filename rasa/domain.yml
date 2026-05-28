@@ -1,0 +1,139 @@
+version: "3.1"
+
+intents:
+  - inform
+  - track_order
+  - return_request
+  - product_availability
+  - payment_issue
+  - warranty_info
+  - delivery_problem
+  - contact_human
+  - greet
+  - farewell
+  - affirm
+  - deny
+  - out_of_scope
+  - cancel_order
+  - bot_challenge
+  - ask_name
+  - ask_age
+  - recommend_product
+
+entities:
+  - order_id
+  - email
+  - product_name
+  - product_category
+
+slots:
+  order_id:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: order_id
+      - type: from_text
+        conditions:
+          - active_loop: order_form
+            requested_slot: order_id
+
+  email:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: email
+
+  product_name:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: product_name
+      - type: from_text
+        conditions:
+          - active_loop: product_form
+            requested_slot: product_name
+
+forms:
+  order_form:
+    required_slots:
+      - order_id
+  return_form:
+    required_slots:
+      - order_id
+  product_form:
+    required_slots:
+      - product_name
+  cancel_form:
+    required_slots:
+      - order_id
+
+responses:
+  utter_greet:
+    - text: "Bună ziua! Sunt asistentul virtual al magazinului. Cu ce vă pot ajuta?"
+    - text: "Salut! Sunt aici să vă ajut. Ce problemă aveți?"
+
+  utter_farewell:
+    - text: "La revedere! O zi bună!"
+    - text: "Cu plăcere! Nu ezitați să reveniți dacă mai aveți întrebări."
+
+  utter_ask_order_id:
+    - text: "Vă rog să îmi furnizați numărul comenzii."
+    - text: "Care este numărul comenzii dumneavoastră?"
+
+  utter_ask_email:
+    - text: "Vă rog să îmi furnizați adresa de email cu care ați plasat comanda."
+
+  utter_ask_product_name:
+    - text: "Ce produs căutați?"
+    - text: "Vă rog să specificați numele produsului."
+
+  utter_out_of_scope:
+    - text: "Îmi pare rău, nu pot ajuta cu asta. Pot să vă conectez cu un agent uman."
+
+  utter_escalate:
+    - text: "Vă transfer către un agent uman. Timpul estimat de așteptare este de 5-10 minute."
+
+  utter_fallback:
+    - text: "Nu am înțeles exact. Pot să vă ajut cu:\n
+             📦 Statusul comenzii\n
+             🔄 Retur produs\n
+             💳 Problemă la plată\n
+             🔧 Informații garanție\n
+             🚚 Problemă livrare\n\n
+             Cu care dintre acestea vă pot ajuta?"
+
+  utter_iamabot:
+    - text: "Sunt un asistent virtual, nu un om real. Dar fac tot posibilul sa fiu de ajutor! Cu ce va pot ajuta?"
+    - text: "Vorbiti cu un chatbot, nu cu o persoana. Ce problema aveti?"
+
+  utter_name:
+    - text: "Ma numesc Asisto, asistentul virtual al magazinului. Cu ce va pot ajuta?"
+    - text: "Sunt Asisto! Sunt aici sa va ajut cu comenzile si produsele."
+
+  utter_age:
+    - text: "Sunt un program, nu am varsta! Dar sunt mereu disponibil 24/7."
+    - text: "Nu am ani, dar am multa rabdare! Cu ce va pot ajuta?"
+
+  utter_ask_feedback:
+    - text: "V-am putut ajuta? Apăsați 👍 dacă da sau 👎 dacă nu."
+
+  utter_confirm_cancel:
+    - text: "Sigur doriți să anulați comanda? Răspundeți cu DA sau NU."
+
+actions:
+  - validate_product_form
+  - validate_order_form
+  - validate_return_form
+  - action_track_order
+  - action_initiate_return
+  - action_check_stock
+  - action_delivery_help
+  - action_warranty_info
+  - action_payment_help
+  - action_escalate
+  - action_cancel_order
+  - action_recommend_product
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true

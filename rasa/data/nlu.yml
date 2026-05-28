@@ -1,0 +1,1239 @@
+version: "3.1"
+
+nlu:
+- regex: order_id
+  examples: |
+    - ORD\d{3,}
+    - [0-9a-f]{32}
+    - \d{5,}
+
+# ══════════════════════════════════════════════════════════════════
+# GREET
+# ══════════════════════════════════════════════════════════════════
+- intent: greet
+  examples: |
+    - Bună ziua!
+    - Bună ziua
+    - Salut!
+    - Salut
+    - Bună dimineața!
+    - Bună dimineața
+    - Bună seara!
+    - Bună seara
+    - Hey!
+    - Hey
+    - Salutare!
+    - Salutare
+    - Bună!
+    - Bună
+    - Hei!
+    - Hei
+    - Hello!
+    - Hello
+    - Hi!
+    - Hi
+    - Servus!
+    - Servus
+    - Noroc!
+    - Noroc
+    - Hei, am nevoie de ajutor
+    - Salut, am nevoie de ajutor
+    - Bună, am nevoie de ajutor
+    - Salut, sunt aici
+    - Bună ziua, am o întrebare
+    - Bună, mă puteți ajuta?
+    - Salut, am nevoie de asistență
+    - Hei, mă poți ajuta?
+    - Bună ziua, am nevoie de ajutor
+    - Salut, am o problemă
+    - Bună, am o întrebare pentru voi
+    - Hello, am nevoie de asistență
+    - Bună ziua, vreau să vorbesc cu cineva
+    - Salut echipă
+    - Bună ziua echipă
+    - Am nevoie de ajutor
+    - Ajutați-mă vă rog
+    - Bună, sunt un client
+    - Salut, sunt client la voi
+    - Bună, sunt aici
+    - Hei, bună ziua
+    - Salutare, am o problemă
+    - Bună dimineața, am nevoie de ajutor
+    - Bună seara, pot fi ajutat?
+    - Hei, am o întrebare
+    - Salut, pot să vă contactez?
+    - Bună, sunt disponibil?
+
+# ══════════════════════════════════════════════════════════════════
+# FAREWELL
+# ══════════════════════════════════════════════════════════════════
+- intent: farewell
+  examples: |
+    - La revedere!
+    - La revedere
+    - Pa!
+    - Pa
+    - Pa pa
+    - Pa pa!
+    - O zi bună!
+    - O zi bună
+    - O zi frumoasă!
+    - O zi frumoasă
+    - Mulțumesc, la revedere!
+    - Mulțumesc, la revedere
+    - Gata, asta era, mulțumesc!
+    - Gata, asta era, mulțumesc
+    - Ne auzim!
+    - Ne auzim
+    - Mulțumesc pentru ajutor!
+    - Mulțumesc pentru ajutor
+    - Atât aveam, mulțumesc!
+    - Atât aveam, mulțumesc
+    - Ok, am înțeles, mulțumesc!
+    - Ok, am înțeles, mulțumesc
+    - Bye!
+    - Bye
+    - Pe curând!
+    - Pe curând
+    - Mulțumesc, o zi plăcută!
+    - Mulțumesc, o zi plăcută
+    - Asta era tot, mulțumesc!
+    - Asta era tot, mulțumesc
+    - Gata, mulțumesc
+    - Am rezolvat, mulțumesc
+    - E ok, mulțumesc
+    - Bye bye
+    - Ciao!
+    - Ciao
+    - Noapte bună
+    - Mulțumesc frumos
+    - Mulțumesc mult
+    - Vă mulțumesc
+    - Mersi
+    - Mersi mult
+    - Ok mersi
+    - Super mersi
+    - Asta e tot ce aveam nevoie
+    - Am terminat, mulțumesc
+    - Nu mai am întrebări
+    - Totul e clar, mulțumesc
+    - Problemă rezolvată, mulțumesc
+    - Merge, mulțumesc
+    - Perfect, mulțumesc
+    - Super, mulțumesc
+    - Excelent, mulțumesc
+    - Am înțeles tot, mulțumesc
+    - Gata am ce îmi trebuie
+    - Bun, asta era
+    - Ok gata
+    - Am terminat
+    - Închei conversația
+    - Mulțumesc pentru tot
+    - Apreciez ajutorul
+    - Ați fost de ajutor
+    - merci
+    - mersi
+    - multumesc
+    - ok multumesc
+    - super multumesc
+
+# ══════════════════════════════════════════════════════════════════
+# AFFIRM
+# ══════════════════════════════════════════════════════════════════
+- intent: affirm
+  examples: |
+    - Da
+    - Da!
+    - Da, corect
+    - Exact
+    - Exact!
+    - Așa este
+    - Da, asta voiam
+    - Corect
+    - Da, mersi
+    - Da, confirm
+    - Bun, da
+    - Da, vă rog
+    - Bine
+    - Ok
+    - Ok!
+    - Desigur
+    - Sigur
+    - Evident
+    - Da, vă rog continuați
+    - Da, asta e
+    - Asta e corect
+    - Da, așa e
+    - Perfect
+    - Da, da
+    - Yep
+    - Yes
+    - Confirm
+    - Adevărat
+    - Corect, asta e
+    - Da, ați înțeles bine
+    - Exact asta
+    - Tocmai
+    - Întocmai
+    - Chiar așa
+    - Da, mă rog
+    - Da, și?
+    - Aha, da
+
+# ══════════════════════════════════════════════════════════════════
+# DENY
+# ══════════════════════════════════════════════════════════════════
+- intent: deny
+  examples: |
+    - Nu
+    - Nu!
+    - Nu, nu asta
+    - Nu e corect
+    - Nu, altceva
+    - Nu mulțumesc
+    - Nu, renunț
+    - Nu e ce căutam
+    - Nu, greșit
+    - Nope
+    - Nicidecum
+    - Nu, nu e bine
+    - Nu asta voiam
+    - Greșit
+    - Nu, altceva voiam
+    - Nu e asta
+    - Nu vreau
+    - Nu, lăsați
+    - Nu mai e nevoie
+    - Nu, am renunțat
+    - Nu, e ok
+    - Nici vorbă
+    - Nu e cazul
+    - Nu e nevoie
+    - Nu, mulțumesc frumos
+    - Nu acum
+    - Poate altădată
+
+# ══════════════════════════════════════════════════════════════════
+# TRACK ORDER
+# ══════════════════════════════════════════════════════════════════
+- intent: track_order
+  examples: |
+    - Unde este comanda mea?
+    - Unde e comanda mea?
+    - Când ajunge coletul?
+    - Când ajunge comanda?
+    - Vreau să știu statusul comenzii mele
+    - Ce s-a întâmplat cu comanda mea?
+    - Nu mi-a ajuns comanda
+    - Comanda mea întârzie
+    - Când primesc coletul?
+    - Pot să văd unde e comanda?
+    - Care e statusul comenzii [12345](order_id)?
+    - Comanda numărul [98765](order_id) unde e?
+    - Urmărire comandă [45678](order_id)
+    - Nu știu unde e pachetul meu
+    - A plecat comanda mea?
+    - E pe drum comanda?
+    - Când livrează curierul?
+    - Nu am primit nicio confirmare de livrare
+    - Comanda mea e în tranzit?
+    - Vă rog să verificați comanda [11223](order_id)
+    - Unde e coletul cu numărul [33445](order_id)?
+    - Statusul comenzii vă rog
+    - Mi-a ajuns un email că e livrat dar nu am primit nimic
+    - Curierul nu a venit azi
+    - A fost livrat coletul dar nu era nimeni acasă
+    - Vreau să replanific livrarea
+    - Pot verifica comanda cu emailul [test@email.com](email)?
+    - Am comandat acum 5 zile și nu a ajuns nimic
+    - Ce curier livrează comanda mea?
+    - Numărul de tracking al comenzii mele
+    - Unde pot urmări coletul?
+    - am o problema cu comanda mea
+    - am o problema cu comanda
+    - am nevoie de ajutor cu comanda mea
+    - vreau sa verific comanda mea
+    - ma poti ajuta cu o comanda
+    - am facut o comanda si vreau sa stiu statusul
+    - comanda mea nu a ajuns
+    - nu am primit comanda
+    - vreau informatii despre comanda mea
+    - pot sa verific statusul comenzii mele
+    - am o intrebare despre comanda mea
+    - comanda mea are o problema
+    - ajutor cu comanda
+    - am o comanda in asteptare
+    - ce se intampla cu comanda mea
+    - comanda nu apare in cont
+    - nu vad comanda mea
+    - vreau sa stiu despre comanda
+    - comanda mea e blocata
+    - am nevoie de ajutor legat de o comanda
+    - comanda mea nu s-a miscat de 3 zile
+    - pachetul meu nu a ajuns
+    - nu am primit pachetul
+    - unde e pachetul meu
+    - cand soseste comanda
+    - inca nu am primit nimic
+    - am asteptat 7 zile si nimic
+    - ce s-a intamplat cu pachetul meu
+    - comanda a intarziat
+    - livrarea intarzie
+    - nu a ajuns livrarea
+    - vreau sa urmaresc comanda
+    - cum urmaresc comanda
+    - link tracking comanda
+    - am nevoie de codul de tracking
+    - nu gasesc tracking-ul comenzii
+    - comanda spune ca e livrata dar nu am primit-o
+    - comanda [12345](order_id) unde este?
+    - verifica comanda [98765](order_id) te rog
+    - statusul pentru [45678](order_id)
+    - ce status are comanda [11223](order_id)?
+    - informatii comanda [33445](order_id)
+    - am primit sms ca e livrat dar nu gasesc coletul
+    - vecinu a primit comanda mea din greseala
+    - cand vine curierul la mine
+    - curieru spune ca a livrat dar n-am primit nimic
+    - pot sa schimb programarea livrarii
+    - vreau sa livrez la alta adresa
+    - adresa de livrare e gresita
+    - comanda e la punct de ridicare
+    - cat timp mai dureaza
+    - mai dureaza mult
+    - a fost expediat
+    - cand a plecat comanda
+    - comanda e pregatita
+    - comanda e la depozit
+    - in cat timp livrati
+    - termenul de livrare
+    - am depasit termenul de livrare
+    - termenul a expirat si nu am primit
+    - livrati si in provincie
+    - livrati si in orase mici
+    - livrati si in zone rurale
+    - livrati si sambata
+    - vreau sa stiu daca comanda a plecat
+    - ati expediat comanda mea
+    - comanda mea este procesata
+    - cand procesati comanda
+    - cat dureaza procesarea
+    - comanda e in procesare
+    - estimare livrare
+    - data estimata livrare
+    - cand e estimata livrarea
+    - nu am primit notificare livrare
+    - nu am primit email confirmare
+    - unde e confirmare comanda
+    - confirmare plata nu a ajuns
+    - nu stiu daca comanda a fost plasata
+
+# ══════════════════════════════════════════════════════════════════
+# RETURN REQUEST
+# ══════════════════════════════════════════════════════════════════
+- intent: return_request
+  examples: |
+    - Vreau să returnez produsul
+    - Cum fac un retur?
+    - Vreau să înapoiez comanda
+    - Nu sunt mulțumit de produs, vreau retur
+    - Produsul nu e ce am comandat, retur
+    - Cum returnez un produs defect?
+    - Vreau să anulez comanda și să returnez
+    - Procedura de retur
+    - Pot returna un produs deschis?
+    - Returnare produs în garanție
+    - Am primit produsul greșit, vreau retur
+    - Produsul e stricat din fabricație, îl returnez
+    - Cât durează procesul de retur?
+    - Unde trimit produsul pentru retur?
+    - Retur comanda [55667](order_id)
+    - Vreau să returnez comanda [78901](order_id)
+    - Am schimbat decizia, vreau banii înapoi
+    - Produsul nu corespunde descrierii, retur
+    - Cum inițiez un retur?
+    - Vreau să fac un retur pentru comanda de ieri
+    - Pot returna fără motiv?
+    - Am 14 zile la dispoziție pentru retur?
+    - Retur și rambursare
+    - Vreau returnarea banilor
+    - Produsul a sosit deteriorat, vreau retur
+    - Am primit culoarea greșită, vreau schimb sau retur
+    - vreau sa dau inapoi produsul
+    - nu imi place produsul vreau sa il returnez
+    - returnare produs
+    - cum returnez
+    - vreau return
+    - fac un retur
+    - initiez un retur
+    - nu vreau produsul
+    - il trimit inapoi
+    - vreau banii inapoi
+    - refund va rog
+    - vreau refund
+    - cum fac refund
+    - returnare si rambursare
+    - produsul nu functioneaza vreau retur
+    - produs defect returnare
+    - produs stricat retur
+    - am primit altceva decat am comandat
+    - nu e ce am comandat
+    - marimea e gresita vreau schimb
+    - culoarea e gresita vreau retur
+    - nu corespunde cu descrierea
+    - produsul e diferit de poze
+    - vreau sa schimb produsul
+    - pot face schimb
+    - vreau alt produs in loc
+    - am comandat gresit vreau sa returnez
+    - m-am razgandit vreau retur
+    - nu mai am nevoie de produs
+    - am gasit mai ieftin, vreau retur
+    - nu sunt multumit vreau retur
+    - calitate proasta vreau retur
+    - produsul s-a stricat din prima zi
+    - nu merge produsul
+    - produs nefunctional
+    - am primit produs second hand nu nou
+    - produs deteriorat la livrare retur
+    - ambalaj deteriorat retur
+    - vreau sa returnez in termen legal
+    - am 30 de zile pentru retur
+    - politica de retur
+    - conditii retur
+    - pot returna dupa 14 zile
+    - retur dupa o luna
+    - produsul e defect din fabricatie
+    - defect la unboxing
+    - nu a functionat niciodata
+    - am deschis cutia si era stricat
+    - vreau eticheta de retur
+    - cum printez eticheta de retur
+    - cine plateste transportul la retur
+    - transport retur gratuit
+    - cine ridica produsul
+    - vine curieru sa ridice
+    - trebuie sa duc eu la posta
+    - retur prin posta
+    - retur prin curier
+    - cat dureaza rambursarea
+    - in cat timp primesc banii
+    - banii cand se intorc
+
+# ══════════════════════════════════════════════════════════════════
+# PRODUCT AVAILABILITY
+# ══════════════════════════════════════════════════════════════════
+- intent: product_availability
+  examples: |
+    - Mai aveți produsul X în stoc?
+    - Este disponibil [televizorul Samsung](product_name)?
+    - Aveți [laptop Dell](product_name) în stoc?
+    - Când reapare produsul pe stoc?
+    - E disponibil în varianta neagră?
+    - Stocul pentru [iPhone](product_name)
+    - Mai există [frigiderul Beko](product_name)?
+    - Produsul e disponibil pentru livrare rapidă?
+    - Aveți [căști Sony](product_name) la voi?
+    - Când se reaprovizionează stocul?
+    - E în stoc [mașina de spălat Whirlpool](product_name)?
+    - Disponibilitate [aspirator Dyson](product_name)
+    - Nu găsesc produsul pe site, mai e disponibil?
+    - Aveți varianta albă a produsului?
+    - Stoc disponibil pentru livrare azi?
+    - Pot comanda chiar dacă scrie stoc limitat?
+    - Mai aveți [tableta Lenovo](product_name)?
+    - E disponibil și în altă culoare?
+    - Produsul [cuptorul Bosch](product_name) când revine în stoc?
+    - mai aveti in stoc
+    - este disponibil produsul
+    - aveti produsul disponibil
+    - cand revine in stoc
+    - cand se reaprovizoneaza
+    - nu e disponibil ce fac
+    - scrie out of stock cand revine
+    - pot fi anuntat cand revine in stoc
+    - alerta stoc
+    - notificare stoc
+    - vreau sa comand dar nu e in stoc
+    - am vazut ca nu mai e stoc
+    - s-a terminat stocul
+    - mai aveti in depozit
+    - aveti la magazin fizic
+    - pot ridica de la magazin
+    - disponibil click and collect
+    - vreau sa cumpar [telefonul Samsung](product_name) mai aveti?
+    - mai e disponibil [frigiderul LG](product_name)?
+    - [laptopul Asus](product_name) mai e pe stoc?
+    - stoc [televizor Sony](product_name)
+    - aveti [masina de spalat Indesit](product_name)?
+    - mai aveti [tableta iPad](product_name)?
+    - disponibil [aspirator Philips](product_name)?
+    - [cuptor microunde Samsung](product_name) il mai aveti?
+    - cand vine [laptopul Dell](product_name) in stoc?
+    - se mai gaseste [telefonul Huawei](product_name)?
+    - in ce culori aveti [telefonul](product_name)?
+    - aveti si in alb nu doar negru
+    - ce marimi aveti disponibile
+    - aveti in alta culoare
+    - am vazut produsul pe site dar nu il gasesc
+    - produsul a disparut de pe site
+    - nu mai apare produsul
+    - a fost scos din vanzare
+    - mai produceti produsul
+    - aveti stoc in orice culoare
+    - disponibil online dar nu in magazin
+    - disponibil in magazin dar nu online
+    - vreau sa rezerv produsul
+    - pot rezerva pana vine in stoc
+    - precomanda disponibila
+    - pot face precomanda
+    - cand se lanseaza produsul
+    - data lansare
+    - produs nou disponibil
+
+# ══════════════════════════════════════════════════════════════════
+# PAYMENT ISSUE
+# ══════════════════════════════════════════════════════════════════
+- intent: payment_issue
+  examples: |
+    - Nu mi-a mers cardul
+    - Am fost debitat de două ori
+    - Plata nu a fost procesată
+    - Am plătit dar comanda nu apare
+    - Eroare la plată cu cardul
+    - Banii au fost reținuți dar comanda e anulată
+    - Plata a eșuat dar banii au dispărut
+    - Vreau să schimb metoda de plată
+    - Pot plăti în rate?
+    - Nu funcționează plata online
+    - Am primit eroare la checkout
+    - Cardul meu a fost refuzat
+    - Dublu debit pe card
+    - Plata cu PayPal nu merge
+    - Rambursare pentru plată dublă
+    - Am plătit cash la livrare dar nu am primit bon
+    - Factura nu a ajuns pe email
+    - Vreau factura pentru comanda mea
+    - Plata în rate cum funcționează?
+    - Pot folosi mai multe carduri pentru o comandă?
+    - Codul de reducere nu funcționează la plată
+    - Voucherul nu se aplică
+    - Reducerea nu apare la finalizarea comenzii
+    - problema cu plata
+    - nu pot plati
+    - plata nu merge
+    - eroare la plata
+    - cardul nu merge
+    - nu imi merge cardul
+    - tranzactia a esuat
+    - plata a esuat
+    - nu s-a procesat plata
+    - am platit dar nu am primit confirmare
+    - banii au fost scosi dar comanda nu e confirmata
+    - am platit dublu
+    - am fost taxat de doua ori
+    - suma gresita pe card
+    - am platit mai mult decat trebuia
+    - vreau rambursare
+    - cum primesc banii inapoi
+    - cand primesc rambursarea
+    - rambursarea nu a ajuns
+    - banii nu s-au intors
+    - factura lipsa
+    - nu am primit factura
+    - vreau o factura
+    - am nevoie de factura fiscala
+    - bon fiscal
+    - chitanta de plata
+    - dovada de plata
+    - cum platesc cu voucher
+    - voucher-ul nu functioneaza
+    - codul promotional nu merge
+    - discount-ul nu s-a aplicat
+    - reducerea nu apare
+    - card refuzat
+    - banca a blocat plata
+    - plata online nu functioneaza
+    - nu pot finaliza comanda la plata
+    - site-ul crapa la plata
+    - eroare 3D secure
+    - nu pot introduce datele cardului
+    - plata cu Apple Pay nu merge
+    - plata cu Google Pay nu functioneaza
+    - transfer bancar cum fac
+    - cont IBAN pentru plata
+    - pot plati in numerar la livrare
+    - ramburs disponibil
+    - plata la livrare disponibila
+    - am o disputa pe card
+    - banca a contestat tranzactia
+    - chargeback
+    - am contestat plata
+    - nu recunosc tranzactia
+    - tranzactie necunoscuta pe card
+    - platit dar nu livrat
+    - am platit si nu am primit nimic
+    - comanda platita dar anulata
+    - banii retinuti dar comanda anulata
+    - penalizare livrare
+    - taxa suplimentara neasteptata
+    - cost diferit fata de cos
+    - pret diferit la plata
+
+# ══════════════════════════════════════════════════════════════════
+# WARRANTY INFO
+# ══════════════════════════════════════════════════════════════════
+- intent: warranty_info
+  examples: |
+    - Cât durează garanția?
+    - Produsul meu e în garanție?
+    - Cum fac o reclamație în garanție?
+    - Produsul s-a defectat, e în garanție
+    - Garanția pentru [televizor](product_category)
+    - Garanție [electrocasnice](product_category)
+    - Cât e garanția la [laptopuri](product_category)?
+    - Unde duc produsul pentru service în garanție?
+    - Produsul nu mai funcționează după 3 luni
+    - Garanție extinsă cum cumpăr?
+    - Certificatul de garanție îl primesc fizic sau digital?
+    - Garanția acoperă și deteriorările accidentale?
+    - Am pierdut certificatul de garanție
+    - Pot verifica garanția online?
+    - Service autorizat în garanție
+    - Produsul e în afara garanției, ce fac?
+    - Garanție internațională?
+    - Piese de schimb în garanție
+    - Termenul de garanție a expirat dar produsul e defect
+    - Garanție 2 ani sau 1 an?
+    - garantie produs
+    - cat tine garantia
+    - perioada garantie
+    - cum functioneaza garantia
+    - ce acopera garantia
+    - garantia mea e valabila
+    - verific garantia
+    - produsul s-a defectat garantie
+    - produs defect in garantie
+    - trimit la service
+    - service in garantie
+    - reparatie in garantie
+    - inlocuire in garantie
+    - produsul nu porneste garantie
+    - nu functioneaza corect garantie
+    - display-ul s-a stricat garantie
+    - bateria nu tine garantie
+    - s-a stricat repede garantie
+    - defect dupa o luna garantie
+    - garantie extinsa
+    - cumpar garantie extinsa
+    - prelungire garantie
+    - garantie suplimentara
+    - asigurare produs
+    - ce fac daca expira garantia
+    - produs vechi fara garantie
+    - am pierdut bonul de garantie
+    - garantia fara bon merge
+    - nu am certificatul de garantie
+    - pot reclama fara garantie
+    - piese de schimb produs defect
+    - manopera service garantie
+    - centru service autorizat
+    - unde e service-ul
+    - cat dureaza reparatia in garantie
+    - cand imi vine produsul de la service
+    - produsul a stat 2 saptamani la service
+    - service-ul nu rezolva problema
+    - au reparat dar s-a stricat din nou
+    - aceeasi problema dupa reparatie
+    - produsul a fost reparat de doua ori
+    - cand pot cere inlocuire nu reparatie
+    - dreptul la inlocuire
+    - produs inlocuit in garantie
+    - produs nou in garantie
+    - garantia pentru accesorii
+    - garantia pentru baterie
+    - garantia pentru ecran
+
+# ══════════════════════════════════════════════════════════════════
+# DELIVERY PROBLEM
+# ══════════════════════════════════════════════════════════════════
+- intent: delivery_problem
+  examples: |
+    - Comanda mea întârzie foarte mult
+    - Curierul nu a ajuns
+    - Mi s-a livrat produsul greșit
+    - Am primit un produs deteriorat
+    - Coletul era deschis la livrare
+    - Lipsesc produse din comandă
+    - Am primit mai puțin decât am comandat
+    - Produsul a venit spart
+    - Ambalajul era deteriorat la livrare
+    - Curierul a lăsat coletul afară fără să bată
+    - Nu era nimeni acasă și curierul a plecat
+    - Comanda scrie livrat dar nu am primit nimic
+    - Adresa de livrare e greșită, cum o schimb?
+    - Pot schimba adresa de livrare?
+    - Livrarea a fost reprogramată fără să fiu anunțat
+    - Estimarea livrării s-a schimbat
+    - Comanda e returnată la expeditor, de ce?
+    - Curierul nu mă sună înainte să vină
+    - Vreau să schimb data de livrare
+    - Livrare în weekend posibil?
+    - Livrare rapidă next day
+    - problema cu livrarea
+    - livrarea nu a sosit
+    - nu am primit livrarea
+    - curier nu a venit
+    - curieru nu a sunat
+    - am primit produsul gresit
+    - produs gresit livrat
+    - am primit altceva
+    - comanda gresita livrata
+    - produsul a venit spart
+    - produsul era deteriorat
+    - ambalaj stricat
+    - produs avariat
+    - colet deteriorat
+    - lipsa produse din colet
+    - nu am primit tot ce am comandat
+    - comanda incompleta
+    - lipseste un produs
+    - am primit mai putine
+    - curieru a lasat coletul la usa fara sa sune
+    - coletul a ramas afara toata noaptea
+    - curieru nu a batut la usa
+    - nu am auzit curieru
+    - curieru spune ca a livrat dar nu e adevarat
+    - in aplicatie scrie livrat dar nu am primit
+    - cineva a furat coletul
+    - coletul a disparut
+    - nu gasesc coletul
+    - adresa gresita pe comanda
+    - am pus adresa gresita
+    - vreau sa schimb adresa
+    - schimbare adresa livrare
+    - livrati la alta adresa
+    - nu pot fi acasa
+    - reprogramare livrare
+    - vreau alta zi de livrare
+    - cand vine curieru
+    - fereastra de livrare
+    - ora aproximativa livrare
+    - livrare sambata posibil
+    - livrare duminica posibil
+    - livrare urgenta
+    - cat de repede livrati
+    - coletul e la vecin
+    - curieru a lasat la vecin
+    - nu stiu la ce vecin
+    - coletul a fost lasat la asociatie
+    - am gasit coletul plouat afara
+    - coletul a stat in ploaie
+    - produsul s-a udat
+    - cutia era zdrobita
+    - produs complet distrus
+    - nu recunosc livrarea
+    - nu am comandat nimic
+    - am primit un colet care nu e al meu
+    - coletul e pentru alta persoana
+    - coletul are alt nume
+
+# ══════════════════════════════════════════════════════════════════
+# CONTACT HUMAN
+# ══════════════════════════════════════════════════════════════════
+- intent: contact_human
+  examples: |
+    - Vreau să vorbesc cu un operator
+    - Conectați-mă la un agent uman
+    - Vreau să vorbesc cu cineva
+    - Transferați-mă la suport
+    - Nu mă poate ajuta robotul, vreau om
+    - Agent uman vă rog
+    - Suport clienți uman
+    - Vreau să vorbesc cu o persoană reală
+    - Operatorul vă rog
+    - Nu înțeleg, vreau ajutor de la o persoană
+    - Vreau să sun la suport
+    - Numărul de telefon al suportului
+    - Email suport clienți
+    - Contactați un specialist
+    - Nu ești de ajutor, vreau un om
+    - Chat live cu agent
+    - Escaladați problema mea
+    - Problema mea e urgentă, vreau operator
+    - vreau sa vorbesc cu un om
+    - conectati-ma la un om
+    - vreau agent
+    - agent uman
+    - operator uman
+    - un om va rog
+    - nu vreau robot
+    - nu ma ajuta robotul
+    - prefer sa vorbesc cu cineva
+    - pot vorbi cu un agent
+    - transferati-ma
+    - escaladare
+    - problema urgenta
+    - caz urgent
+    - am o urgenta
+    - e urgent
+    - e foarte important
+    - nu pot rezolva cu botul
+    - botul nu intelege
+    - robotul nu ma ajuta
+    - vreau sa vorbesc cu un consultant
+    - consultant disponibil
+    - suport telefonic
+    - numar de telefon
+    - cum va sun
+    - cand puteti suna
+    - vreau sa fiu sunat
+    - callback va rog
+    - cum va contactez
+    - email suport
+    - adresa email suport
+    - chat cu agent
+    - live chat
+    - agent disponibil
+    - cand e disponibil agentul
+    - program suport
+    - ore de lucru suport
+    - vreau sa depun o reclamatie
+    - reclamatie formala
+    - vreau sa ma plang
+    - sunt nemultumit vreau sa vorbesc cu cineva
+    - situatia nu s-a rezolvat
+    - problema persistenta
+    - nu s-a rezolvat nimic
+    - de doua ori am sunat si nu s-a rezolvat
+    - vreau sa escaladez
+    - vreau managerul
+    - cer sa vorbesc cu un supervisor
+    - supervisor disponibil
+
+# ══════════════════════════════════════════════════════════════════
+# OUT OF SCOPE
+# ══════════════════════════════════════════════════════════════════
+- intent: out_of_scope
+  examples: |
+    - Care e vremea azi?
+    - Spune-mi o glumă
+    - Câți ani ai?
+    - Ce poți face tu?
+    - Ești un robot?
+    - Cum te cheamă?
+    - Cel mai bun produs al vostru
+    - Recomandă-mi ceva
+    - Care e cel mai ieftin produs?
+    - Aveți reduceri?
+    - ce faci
+    - cum esti
+    - ce mai faci
+    - esti inteligent
+    - esti AI
+    - esti ChatGPT
+    - cine te-a creat
+    - cine esti tu
+    - ce esti tu
+    - povesteste-mi ceva
+    - stii bancuri
+    - hai sa vorbim
+    - ce parere ai despre
+    - imi dai un sfat
+    - ajuta-ma sa aleg
+    - ce produs sa cumpar
+    - care e mai bun
+    - compara produse
+    - recenzie produs
+    - pareri despre produs
+    - vreau sa cumpar ceva
+    - ce ai nou
+    - catalog produse
+    - promotii
+    - oferte
+    - campanie
+    - stiri
+    - noutati
+    - blog
+    - social media
+    - instagram vostru
+    - facebook vostru
+    - care sunt orele de program
+    - unde sunt magazinele voastre
+    - aveti magazine fizice
+    - adresa magazin
+    - cum ajung la voi
+    - aveti parcare
+    - cum ma inregistrez pe site
+    - am uitat parola
+    - nu pot intra in cont
+    - vreau sa sterg contul
+    - vreau sa schimb emailul
+    - abonament newsletter
+    - dezabonare newsletter
+
+# ══════════════════════════════════════════════════════════════════
+# INFORM
+# ══════════════════════════════════════════════════════════════════
+- intent: inform
+  examples: |
+    - [12345](order_id)
+    - [98765](order_id)
+    - [45678](order_id)
+    - [11223](order_id)
+    - [33445](order_id)
+    - [55667](order_id)
+    - [78901](order_id)
+    - [10293](order_id)
+    - [847362](order_id)
+    - [192837](order_id)
+    - [564738](order_id)
+    - [293847](order_id)
+    - [738291](order_id)
+    - [918273](order_id)
+    - [647382](order_id)
+    - numărul este [12345](order_id)
+    - numărul comenzii este [98765](order_id)
+    - comanda [45678](order_id)
+    - comanda numărul [11223](order_id)
+    - e [33445](order_id)
+    - este [55667](order_id)
+    - [45678](order_id) e numărul
+    - da e [12345](order_id)
+    - numărul meu e [98765](order_id)
+    - am comanda [45678](order_id)
+    - comanda mea e [11223](order_id)
+    - id-ul comenzii e [33445](order_id)
+    - am primit codul [55667](order_id)
+    - numărul din email e [78901](order_id)
+    - am notat [10293](order_id)
+    - iată numărul [847362](order_id)
+    - codul e [192837](order_id)
+    - am notat [564738](order_id) din email
+    - da comanda e [293847](order_id)
+    - [test@email.com](email)
+    - [user@gmail.com](email)
+    - [client@yahoo.ro](email)
+    - [madalin@gmail.com](email)
+    - [contact@test.ro](email)
+    - [filipmadalin@gmail.com](email)
+    - emailul meu e [test@email.com](email)
+    - am comandat cu [user@gmail.com](email)
+    - adresa mea e [client@yahoo.ro](email)
+    - email: [test@email.com](email)
+    - [madalin@gmail.com](email) e emailul meu
+    - emailul folosit e [contact@test.ro](email)
+    - m-am inregistrat cu [filipmadalin@gmail.com](email)
+    - [televizorul Samsung](product_name)
+    - [laptop Dell](product_name)
+    - [iPhone](product_name)
+    - [frigider Beko](product_name)
+    - [mașina de spălat Whirlpool](product_name)
+    - caut [aspiratorul Dyson](product_name)
+    - vreau [tableta Lenovo](product_name)
+    - [cuptorul Bosch](product_name)
+    - produsul e [căști Sony](product_name)
+    - [televizor LG](product_name)
+    - [telefon Xiaomi](product_name)
+    - [cuptor microunde Gorenje](product_name)
+    - [laptop HP](product_name)
+    - [smartwatch Samsung](product_name)
+    - pot sa va dau emailul
+    - va dau emailul meu
+    - am emailul la mine
+    - vreau sa incerc cu emailul
+    - emailul meu e [test@email.com](email)
+    - pot incerca cu adresa de email
+    - incerc cu emailul
+    - da vreau sa incerc cu emailul
+
+# ══════════════════════════════════════════════════════════════════
+# EXTRA EXAMPLES — track_order (variante suplimentare)
+# ══════════════════════════════════════════════════════════════════
+- intent: track_order
+  examples: |
+    - am platit si nu a venit nimic
+    - comanda mea nu a ajuns desi am platit
+    - astept comanda de mult timp
+    - nu primesc nicio veste despre comanda
+    - comanda mea e pierduta
+    - credeți ca s-a pierdut comanda
+    - comanda nu mai apare in sistem
+    - nu gasesc comanda in contul meu
+    - am primit tracking dar nu se actualizeaza
+    - tracking-ul nu s-a miscat de 4 zile
+    - trackingul arata aceeasi locatie
+    - codul de tracking nu functioneaza
+    - codul de tracking e invalid
+    - linkul de tracking nu merge
+    - site-ul curierului nu recunoaste codul
+    - curieru a incercat sa livreze dar eu nu eram
+    - curieru a lasat aviz
+    - am primit aviz dar nu stiu ce sa fac
+    - am aviz de la curier
+    - trebuie sa ridic de la sediu curier
+    - de unde ridic comanda
+    - adresa sediu curier
+    - pot ridica de la orice punct curier
+    - easybox disponibil
+    - livrare in easybox
+    - livrare in locker
+    - cum setez livrarea in locker
+    - vreau schimb punctul de livrare
+    - vreau sa schimb metoda de livrare
+
+# ══════════════════════════════════════════════════════════════════
+# EXTRA EXAMPLES — return_request (variante suplimentare)
+# ══════════════════════════════════════════════════════════════════
+- intent: return_request
+  examples: |
+    - returnam produsul
+    - dau inapoi produsul
+    - nu ma multumeste
+    - vreau sa il duc inapoi
+    - cum il returnez pe acesta
+    - unde returnez produsul
+    - adresa de retur
+    - cum ambalez pentru retur
+    - trebuie sa il ambalez original
+    - pot folosi alt ambalaj la retur
+    - retur fara ambalaj original
+    - retur produs dezambalat
+    - am aruncat cutia original pot returna
+    - returnare partial din comanda
+    - vreau sa returnez doar un produs din comanda
+    - retur partial
+    - nu returnez toata comanda
+    - returnez unul din doua produse
+    - am comandat 3 vreau sa returnez 1
+    - sunt in perioada de retur
+    - mai am timp sa returnez
+    - termenul de retur a expirat
+    - pot returna si dupa 14 zile
+    - retur dupa termenul legal
+
+- intent: cancel_order
+  examples: |
+    - vreau să anulez comanda
+    - anulez comanda
+    - cancel comanda
+    - nu mai vreau comanda
+    - vreau să renunț la comandă
+    - pot anula comanda?
+    - anulare comandă
+    - vreau să opresc comanda
+    - nu mai am nevoie de comandă
+    - vreau să dau înapoi comanda înainte să fie livrată
+    - anulez înainte de livrare
+    - comanda mea nu a plecat încă, o anulez
+    - vreau anulare
+    - renunț la comandă
+    - oprește comanda mea
+    - nu mai trimiteti comanda
+    - stornare comanda
+    - retrag comanda
+
+# ══════════════════════════════════════════════════════════════════
+# EXTRA EXAMPLES — payment_issue (variante suplimentare)
+# ══════════════════════════════════════════════════════════════════
+- intent: payment_issue
+  examples: |
+    - vreau sa platesc altfel
+    - pot schimba metoda de plata
+    - am ales ramburs dar vreau card
+    - am ales card dar vreau ramburs
+    - schimb plata la livrare
+    - pot adauga card nou
+    - cardul meu a expirat
+    - am card nou cum il adaug
+    - platesc cu cardul altei persoane
+    - pot plati cu cardul sotului
+    - factura pe firma
+    - vreau factura cu datele firmei
+    - cod fiscal pe factura
+    - CUI pe factura
+    - factura proforma
+    - vreau proforma
+    - factura in alta valuta
+    - pretul in euro
+    - platesc in euro
+    - conversie valutara la plata
+
+# ══════════════════════════════════════════════════════════════════
+# EXTRA EXAMPLES — delivery_problem (variante suplimentare)
+# ══════════════════════════════════════════════════════════════════
+- intent: delivery_problem
+  examples: |
+    - curieru nu vorbeste romana
+    - nu am putut comunica cu curieru
+    - curieru a fost nepoliticos
+    - curieru a aruncat coletul
+    - curieru nu a respectat produsul fragil
+    - era marcat fragil dar a venit spart
+    - nu a respectat indicatia fragil
+    - comanda a facut o saptamana in plus
+    - am asteptat 2 saptamani
+    - am asteptat o luna
+    - intarziere nejustificata
+    - nu mi s-a comunicat intarzierea
+    - nu am primit sms de livrare
+    - nu am primit email de livrare
+    - nu am primit nicio notificare
+    - nu sunt anuntat cu nimic
+    - nu stiu cand vine curieru
+    - estimare gresita livrare
+    - mi s-a spus ca vine luni dar nu a venit
+    - data promisa nu a fost respectata
+
+# ══════════════════════════════════════════════════════════════════
+# EXTRA EXAMPLES — warranty_info (variante suplimentare)
+# ══════════════════════════════════════════════════════════════════
+- intent: warranty_info
+  examples: |
+    - produsul miroase urat garantie
+    - face zgomot ciudat garantie
+    - nu se incalzeste bine garantie
+    - consuma prea mult garantie
+    - nu raceste bine garantie
+    - televizorul are pixeli morti garantie
+    - ecranul are o dungă garantie
+    - tastatura nu merge garantie
+    - camera nu functioneaza garantie
+    - microfonul nu merge garantie
+    - difuzorul nu merge garantie
+    - nu se conecteaza la wifi garantie
+    - bluetooth nu merge garantie
+    - incarcatorul nu functioneaza garantie
+    - cablul e defect garantie
+    - accesoriile defecte garantie
+    - telecomanda defecta garantie
+    - nu am primit toate accesoriile garantie
+    - lipseste ceva din cutie garantie
+
+# ══════════════════════════════════════════════════════════════════
+# EXTRA EXAMPLES — contact_human (variante suplimentare)
+# ══════════════════════════════════════════════════════════════════
+- intent: contact_human
+  examples: |
+    - vreau sa vorbesc despre o situatie complexa
+    - nu se poate rezolva automat
+    - situatia mea e speciala
+    - am un caz special
+    - problema mea nu e standard
+    - nu se gaseste in optiunile voastre
+    - nimic din ce ai spus nu se aplica
+    - altceva este problema
+    - pot vorbi cu cineva acum
+    - e cineva disponibil
+    - astept de mult la telefon
+    - nu raspunde nimeni la telefon
+    - linia e ocupata
+    - nu pot suna
+    - nu functioneaza numarul de telefon
+    - emailul nu a primit raspuns
+    - am trimis email si nu raspunde nimeni
+    - nu primesc raspuns la email
+    - am asteptat 3 zile raspuns
+    - nimeni nu ma contacteaza
+
+
+# ══════════════════════════════════════════════════════════════════
+# EXTRA FINAL — mixed intents (ajunge la 1000+)
+# ══════════════════════════════════════════════════════════════════
+- intent: track_order
+  examples: |
+    - comanda mea se afla unde
+    - pot vedea statusul acum
+    - statusul actual al comenzii
+    - refresh status comanda
+    - actualizati statusul va rog
+    - comanda nu s-a actualizat de 2 zile
+    - ultimul update pe comanda mea
+    - cand a fost ultima actualizare
+    - nu mai apare miscata comanda
+    - comanda e stationara
+    - de ce nu se misca comanda
+    - curieru nu a preluat inca
+    - cand preia curieru comanda
+    - cand o sa fie ridicata comanda
+    - comanda astept sa fie ridicata de curier
+    - comanda e la voi in depozit
+    - a iesit din depozit comanda
+    - a intrat la curier comanda
+
+- intent: return_request
+  examples: |
+    - incep procedura de retur
+    - completez formularul de retur
+    - unde e formularul de retur
+    - am nevoie de formular retur
+    - cum completez returul online
+    - retur din contul meu
+    - sectiunea retur in cont
+    - nu gasesc optiunea de retur
+    - butonul de retur nu apare
+    - nu pot initia returul online
+    - returul nu merge online
+    - eroare la initiere retur
+    - sistemul nu accepta returul
+
+- intent: bot_challenge
+  examples: |
+    - esti un robot?
+    - esti om sau robot?
+    - vorbesc cu un bot?
+    - esti AI?
+    - esti o persoana reala?
+    - esti inteligent?
+    - esti un program?
+    - esti ChatGPT?
+    - esti Asisto?
+    - tu esti bot?
+
+- intent: ask_name
+  examples: |
+    - cum te cheama?
+    - care e numele tau?
+    - cum iti spun?
+    - ai un nume?
+    - cum te numesti?
+    - spune-mi numele tau
+    - cum te cheama pe tine?
+    - ce nume ai?
+
+- intent: ask_age
+  examples: |
+    - cati ani ai?
+    - ce varsta ai?
+    - esti tanar?
+    - de cand existi?
+    - cand ai fost creat?
+    - ai varsta?
+    - esti nou?
+    - de cand functionezi?
+
+- intent: recommend_product
+  examples: |
+    - recomanda-mi un ceas
+    - ce ceas sa cumpar
+    - recomanda-mi un telefon
+    - ce laptop sa cumpar
+    - recomanda-mi ceva
+    - ce televizor sa iau
+    - sugereaza-mi un produs
+    - ce electrocasnic sa cumpar
+    - recomanda-mi un aspirator
+    - ce tableta sa aleg
+    - ajuta-ma sa aleg un laptop
+    - vreau sa cumpar un ceas
+    - vreau sa cumpar un telefon
+    - vreau un televizor nou
+    - ce gaming sa iau
+    - recomanda un smartwatch
+    - cauta-mi un laptop
+    - arata-mi telefoane
+    - arata-mi ceasuri
+    - ce produse aveti la telefoane
+    - ce laptopuri aveti
+
+    

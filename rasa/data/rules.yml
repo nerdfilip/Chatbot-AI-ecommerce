@@ -1,0 +1,135 @@
+version: "3.1"
+
+rules:
+
+- rule: salut
+  steps:
+    - intent: greet
+    - action: utter_greet
+
+- rule: la revedere
+  steps:
+    - intent: farewell
+    - action: utter_farewell
+
+- rule: escaladare
+  steps:
+    - intent: contact_human
+    - action: action_escalate
+
+- rule: out of scope
+  steps:
+    - intent: out_of_scope
+    - action: utter_out_of_scope
+
+- rule: fallback
+  steps:
+    - intent: nlu_fallback
+    - action: utter_fallback
+
+- rule: activare order form
+  steps:
+    - intent: track_order
+    - action: order_form
+    - active_loop: order_form
+
+- rule: submit order form
+  condition:
+    - active_loop: order_form
+  steps:
+    - action: order_form
+    - active_loop: null
+    - action: action_track_order
+
+- rule: activare return form
+  steps:
+    - intent: return_request
+    - action: return_form
+    - active_loop: return_form
+
+- rule: submit return form
+  condition:
+    - active_loop: return_form
+  steps:
+    - action: return_form
+    - active_loop: null
+    - action: action_initiate_return
+
+- rule: activare product form
+  steps:
+    - intent: product_availability
+    - action: product_form
+    - active_loop: product_form
+
+- rule: submit product form
+  condition:
+    - active_loop: product_form
+  steps:
+    - action: product_form
+    - active_loop: null
+    - action: action_check_stock
+
+- rule: bot challenge
+  steps:
+    - intent: bot_challenge
+    - action: utter_iamabot
+
+- rule: ask name
+  steps:
+    - intent: ask_name
+    - action: utter_name
+
+- rule: delivery problem cu slot deja setat
+  condition:
+    - slot_was_set:
+      - order_id: ORD017
+  steps:
+    - intent: delivery_problem
+    - action: action_delivery_help
+
+- rule: delivery problem dupa tracking
+  condition:
+    - slot_was_set:
+      - order_id: true
+  steps:
+    - intent: delivery_problem
+    - action: action_delivery_help
+
+- rule: delivery problem oricand
+  steps:
+    - intent: delivery_problem
+    - action: action_delivery_help
+
+- rule: activare cancel form
+  steps:
+    - intent: cancel_order
+    - action: cancel_form
+    - active_loop: cancel_form
+
+- rule: submit cancel form
+  condition:
+    - active_loop: cancel_form
+  steps:
+    - action: cancel_form
+    - active_loop: null
+    - action: action_cancel_order
+
+- rule: bot challenge
+  steps:
+    - intent: bot_challenge
+    - action: utter_iamabot
+
+- rule: ask name
+  steps:
+    - intent: ask_name
+    - action: utter_name
+
+- rule: ask age
+  steps:
+    - intent: ask_age
+    - action: utter_age
+
+- rule: recomandare produs
+  steps:
+    - intent: recommend_product
+    - action: action_recommend_product

@@ -1,110 +1,81 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --blue:        #2563eb;
-  --blue-dark:   #1d4ed8;
-  --blue-light:  #eff6ff;
-  --blue-mid:    #dbeafe;
-  --green:       #22c55e;
-  --red:         #ef4444;
-  --gray-50:     #f8fafc;
-  --gray-100:    #f1f5f9;
-  --gray-200:    #e2e8f0;
-  --gray-300:    #cbd5e1;
-  --gray-400:    #94a3b8;
-  --gray-500:    #64748b;
-  --gray-700:    #334155;
-  --gray-900:    #0f172a;
-  --white:       #ffffff;
-  --radius-sm:   6px;
-  --radius-md:   12px;
-  --radius-lg:   20px;
-  --shadow-sm:   0 1px 3px rgba(0,0,0,0.08);
-  --shadow-md:   0 4px 16px rgba(0,0,0,0.08);
-  --shadow-lg:   0 12px 40px rgba(0,0,0,0.12);
-  --shadow-blue: 0 4px 20px rgba(37,99,235,0.30);
-  --transition:  0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --font:        'DM Sans', sans-serif;
+  --navy:   #0f172a;
+  --blue:   #2563eb;
+  --gray-50: #f8fafc;
+  --gray-100:#f1f5f9;
+  --gray-200:#e2e8f0;
+  --gray-400:#94a3b8;
+  --white:  #ffffff;
+  --font:   'Outfit', sans-serif;
+  --ease:   cubic-bezier(0.4,0,0.2,1);
 }
 
 html { scroll-behavior: smooth; }
+
 body {
   font-family: var(--font);
-  background: var(--gray-100);
-  color: var(--gray-900);
+  background: var(--gray-50);
+  color: var(--navy);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.app-root { min-height: 100vh; }
+.app-root { min-height: 100vh; background: var(--gray-50); }
+
 .app-main {
   max-width: 1440px;
   margin: 0 auto;
-  padding-bottom: 80px;
-  animation: fadeUp 0.5s ease both;
+  padding-bottom: 100px;
 }
 
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; } to { opacity: 1; }
-}
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; } 50% { opacity: 0.45; }
-}
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes popIn {
-  0%  { opacity: 0; transform: scale(0.9); }
-  60% { transform: scale(1.02); }
-  100%{ opacity: 1; transform: scale(1); }
-}
-@keyframes shimmer {
-  0%   { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
-}
-@keyframes chatOpen {
-  from { opacity: 0; transform: scale(0.9) translateY(20px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-
+/* ── Grid ── */
 .products-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 18px;
-  padding: 24px;
-  animation: fadeIn 0.4s ease both;
+  gap: 16px;
+  padding: 8px 32px 32px;
 }
 
-.product-card {
-  transition: transform var(--transition), box-shadow var(--transition);
-  animation: slideUp 0.4s ease both;
+/* ── Card animations ── */
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Card hover ── */
 .product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg) !important;
+  transform: translateY(-5px) !important;
+  box-shadow: 0 16px 48px rgba(15,23,42,0.10), 0 4px 16px rgba(15,23,42,0.06) !important;
 }
 
-button { font-family: var(--font); cursor: pointer; transition: all var(--transition); }
-button:active { transform: scale(0.97); }
-
-input:focus {
-  outline: none;
-  border-color: var(--blue) !important;
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.15) !important;
+.product-card:hover .card-emoji {
+  transform: scale(1.12) rotate(-4deg);
 }
 
-::-webkit-scrollbar { width: 5px; }
+/* ── Search placeholder ── */
+input::placeholder { color: var(--gray-400); }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+
+/* ── Cat bar scrollbar hidden ── */
+.cat-scroll::-webkit-scrollbar { display: none; }
 
 /* ── Responsive ── */
 @media (max-width: 1280px) {
@@ -114,8 +85,11 @@ input:focus {
   .products-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
 }
 @media (max-width: 768px) {
-  .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 16px; }
+  .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 8px 16px 32px; }
+  .header-top    { padding: 12px 16px !important; grid-template-columns: auto 1fr !important; }
+  .header-tagline { display: none !important; }
 }
 @media (max-width: 480px) {
-  .products-grid { grid-template-columns: 1fr; gap: 10px; padding: 12px; }
+  .products-grid { grid-template-columns: 1fr; gap: 10px; }
+  .cat-scroll    { padding: 8px 16px !important; }
 }

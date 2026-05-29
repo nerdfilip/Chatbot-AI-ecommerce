@@ -1,189 +1,196 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 const Header = ({ search, onSearch, onCategoryChange, categories, selectedCategory }) => {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const catRef = useRef(null);
+
+  // scroll active category into view
+  useEffect(() => {
+    if (catRef.current) {
+      const active = catRef.current.querySelector('[data-active="true"]');
+      if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }, [selectedCategory]);
+
+  const allCats = [{ key: '', label: 'Toate' }, ...categories.map(c => ({ key: c, label: c }))];
 
   return (
-    <header style={styles.header}>
-      <div style={styles.inner}>
-        {/* Logo */}
-        <div style={styles.logo}>
-          <span style={styles.logoIcon}>🛒</span>
-          <span style={styles.logoText}>FilipShop</span>
+    <header style={S.root}>
+      <div style={S.top}>
+        {/* Brand */}
+        <div style={S.brand}>
+          <div style={S.brandDot} />
+          <span style={S.brandName}>FilipShop</span>
         </div>
 
         {/* Search */}
-        <div style={styles.searchWrap}>
-          <span style={styles.searchIcon}>🔍</span>
+        <div style={{ ...S.searchBox, ...(focused ? S.searchBoxFocused : {}) }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+          </svg>
           <input
             type="text"
-            placeholder="Cauta produse..."
+            placeholder="Caută produse, categorii..."
             value={search}
-            onChange={(e) => onSearch(e.target.value)}
-            style={styles.searchInput}
+            onChange={e => onSearch(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            style={S.searchInput}
           />
           {search && (
-            <button onClick={() => onSearch('')} style={styles.clearBtn}>✕</button>
+            <button onClick={() => onSearch('')} style={S.clearBtn}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </button>
           )}
         </div>
 
-        {/* Mobile menu toggle */}
-        <button
-          style={styles.menuBtn}
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Meniu categorii"
-        >
-          ☰
-        </button>
+        {/* Right slot — empty for symmetry */}
+        <div style={S.brandRight}>
+          <span style={S.tagline}>✦ e-commerce demo</span>
+        </div>
       </div>
 
-      {/* Categories */}
-      <div style={{
-        ...styles.catBar,
-        ...(menuOpen ? styles.catBarOpen : {})
-      }}>
-        <div style={styles.catInner}>
-          {['', ...categories].map((cat, i) => (
-            <button
-              key={i}
-              onClick={() => { onCategoryChange(cat); setMenuOpen(false); }}
-              style={{
-                ...styles.catBtn,
-                ...(selectedCategory === cat ? styles.catBtnActive : {})
-              }}
-            >
-              {cat === '' ? 'Toate' : cat}
-            </button>
-          ))}
+      {/* Category bar */}
+      <div style={S.catWrap}>
+        <div ref={catRef} style={S.catScroll}>
+          {allCats.map(({ key, label }) => {
+            const active = selectedCategory === key;
+            return (
+              <button
+                key={key}
+                data-active={active}
+                onClick={() => onCategoryChange(key)}
+                style={{ ...S.catPill, ...(active ? S.catPillActive : {}) }}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
       </div>
     </header>
   );
 };
 
-const styles = {
-  header: {
-    background: '#2563eb',
+const S = {
+  root: {
+    background: '#ffffff',
+    borderBottom: '1px solid #f1f5f9',
     position: 'sticky',
     top: 0,
     zIndex: 200,
-    boxShadow: '0 2px 20px rgba(37,99,235,0.3)',
+    boxShadow: '0 1px 24px rgba(0,0,0,0.06)',
   },
-  inner: {
+  top: {
     maxWidth: '1440px',
     margin: '0 auto',
-    padding: '12px 24px',
+    padding: '16px 32px',
+    display: 'grid',
+    gridTemplateColumns: '1fr 2fr 1fr',
+    alignItems: 'center',
+    gap: '24px',
+  },
+  brand: {
     display: 'flex',
     alignItems: 'center',
-    gap: '16px',
+    gap: '10px',
   },
-  logo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    flexShrink: 0,
-    textDecoration: 'none',
+  brandDot: {
+    width: '10px',
+    height: '10px',
+    borderRadius: '50%',
+    background: 'linear-gradient(135deg, #2563eb, #06b6d4)',
+    boxShadow: '0 0 0 3px rgba(37,99,235,0.15)',
   },
-  logoIcon: { fontSize: '22px' },
-  logoText: {
-    color: 'white',
+  brandName: {
     fontSize: '20px',
     fontWeight: '700',
-    letterSpacing: '-0.3px',
-    fontFamily: "'DM Sans', sans-serif",
+    color: '#0f172a',
+    fontFamily: "'Outfit', sans-serif",
+    letterSpacing: '-0.5px',
   },
-  searchWrap: {
-    flex: 1,
-    position: 'relative',
+  brandRight: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+  },
+  tagline: {
+    fontSize: '12px',
+    color: '#94a3b8',
+    fontFamily: "'Outfit', sans-serif",
+    letterSpacing: '0.3px',
+  },
+  searchBox: {
     display: 'flex',
     alignItems: 'center',
+    gap: '10px',
+    background: '#f8fafc',
+    border: '1.5px solid #e2e8f0',
+    borderRadius: '14px',
+    padding: '10px 16px',
+    transition: 'all 0.2s',
   },
-  searchIcon: {
-    position: 'absolute',
-    left: '12px',
-    fontSize: '14px',
-    pointerEvents: 'none',
-    zIndex: 1,
+  searchBoxFocused: {
+    background: '#ffffff',
+    borderColor: '#2563eb',
+    boxShadow: '0 0 0 4px rgba(37,99,235,0.08)',
   },
   searchInput: {
-    width: '100%',
-    padding: '9px 36px 9px 36px',
-    borderRadius: '24px',
-    border: '2px solid rgba(255,255,255,0.25)',
-    background: 'rgba(255,255,255,0.15)',
-    color: 'white',
+    flex: 1,
+    border: 'none',
+    background: 'transparent',
     fontSize: '14px',
-    fontFamily: "'DM Sans', sans-serif",
-    backdropFilter: 'blur(8px)',
-    transition: 'all 0.2s',
+    color: '#0f172a',
+    fontFamily: "'Outfit', sans-serif",
     outline: 'none',
+    minWidth: 0,
   },
   clearBtn: {
-    position: 'absolute',
-    right: '10px',
-    background: 'rgba(255,255,255,0.3)',
+    background: 'none',
     border: 'none',
-    color: 'white',
-    width: '20px',
-    height: '20px',
-    borderRadius: '50%',
-    fontSize: '11px',
+    color: '#94a3b8',
+    cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    padding: 0,
-  },
-  menuBtn: {
-    display: 'none',
-    background: 'rgba(255,255,255,0.2)',
-    border: 'none',
-    color: 'white',
-    fontSize: '18px',
-    width: '36px',
-    height: '36px',
-    borderRadius: '8px',
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: '2px',
     flexShrink: 0,
+    transition: 'color 0.15s',
   },
-  catBar: {
-    borderTop: '1px solid rgba(255,255,255,0.15)',
-    overflow: 'hidden',
-    maxHeight: '52px',
-    transition: 'max-height 0.3s ease',
+  catWrap: {
+    borderTop: '1px solid #f8fafc',
+    background: '#fafbfc',
   },
-  catBarOpen: {
-    maxHeight: '200px',
-  },
-  catInner: {
+  catScroll: {
     maxWidth: '1440px',
     margin: '0 auto',
-    padding: '8px 24px',
+    padding: '10px 32px',
     display: 'flex',
     gap: '6px',
-    flexWrap: 'wrap',
     overflowX: 'auto',
     scrollbarWidth: 'none',
+    msOverflowStyle: 'none',
   },
-  catBtn: {
-    padding: '5px 14px',
-    borderRadius: '20px',
-    border: '1.5px solid rgba(255,255,255,0.3)',
-    background: 'transparent',
-    color: 'rgba(255,255,255,0.85)',
-    fontSize: '12px',
+  catPill: {
+    padding: '6px 16px',
+    borderRadius: '999px',
+    border: '1.5px solid #e2e8f0',
+    background: '#ffffff',
+    color: '#64748b',
+    fontSize: '13px',
     fontWeight: '500',
     whiteSpace: 'nowrap',
     cursor: 'pointer',
-    transition: 'all 0.15s',
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
+    transition: 'all 0.18s',
+    flexShrink: 0,
   },
-  catBtnActive: {
-    background: 'white',
-    color: '#2563eb',
-    border: '1.5px solid white',
-    fontWeight: '700',
+  catPillActive: {
+    background: '#0f172a',
+    border: '1.5px solid #0f172a',
+    color: '#ffffff',
+    fontWeight: '600',
+    boxShadow: '0 2px 8px rgba(15,23,42,0.2)',
   },
 };
 

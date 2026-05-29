@@ -3,36 +3,42 @@ import ProductCard from './ProductCard';
 
 const LIMIT = 15;
 
-const SkeletonCard = () => (
-  <div style={skStyles.card}>
-    <div style={{ ...skStyles.block, height: '120px', borderRadius: '12px 12px 0 0' }} />
-    <div style={skStyles.body}>
-      <div style={{ ...skStyles.block, height: '10px', width: '40%' }} />
-      <div style={{ ...skStyles.block, height: '14px', width: '90%', marginTop: '6px' }} />
-      <div style={{ ...skStyles.block, height: '12px', width: '75%', marginTop: '4px' }} />
-      <div style={{ ...skStyles.block, height: '16px', width: '50%', marginTop: '10px' }} />
+const SkeletonCard = ({ index }) => (
+  <div style={{ ...SK.card, animationDelay: `${index * 40}ms` }}>
+    <div style={SK.img} />
+    <div style={SK.body}>
+      <div style={{ ...SK.line, width: '35%', height: '10px' }} />
+      <div style={{ ...SK.line, width: '85%', height: '14px', marginTop: '6px' }} />
+      <div style={{ ...SK.line, width: '70%', height: '12px', marginTop: '4px' }} />
+      <div style={{ ...SK.line, width: '55%', height: '12px', marginTop: '2px' }} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '14px' }}>
+        <div style={{ ...SK.line, width: '30%', height: '11px' }} />
+        <div style={{ ...SK.line, width: '35%', height: '14px' }} />
+      </div>
     </div>
   </div>
 );
 
-const skStyles = {
+const SK = {
   card: {
     background: 'white',
-    borderRadius: '16px',
+    borderRadius: '18px',
     overflow: 'hidden',
     border: '1px solid #f1f5f9',
+    animation: 'cardIn 0.4s ease both',
   },
-  block: {
-    background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)',
+  img: {
+    height: '130px',
+    background: 'linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%)',
     backgroundSize: '400px 100%',
     animation: 'shimmer 1.4s ease infinite',
-    borderRadius: '6px',
   },
-  body: {
-    padding: '14px 16px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
+  body: { padding: '16px', display: 'flex', flexDirection: 'column' },
+  line: {
+    borderRadius: '6px',
+    background: 'linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%)',
+    backgroundSize: '400px 100%',
+    animation: 'shimmer 1.4s ease infinite',
   },
 };
 
@@ -41,63 +47,59 @@ const ProductGrid = ({ products, loading, total, page, onPageChange }) => {
 
   if (loading) {
     return (
-      <div>
-        <div style={styles.info}>
-          <div style={{ ...skStyles.block, height: '14px', width: '120px' }} />
+      <div style={{ padding: '0 0 40px' }}>
+        <div style={S.topBar}>
+          <div style={{ ...SK.line, width: '100px', height: '13px' }} />
         </div>
         <div className="products-grid">
-          {Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} />)}
+          {Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} index={i} />)}
         </div>
       </div>
     );
   }
 
-  if (products.length === 0) {
+  if (!products.length) {
     return (
-      <div style={styles.empty}>
-        <span style={{ fontSize: '56px' }}>🔍</span>
-        <p style={styles.emptyTitle}>Niciun produs găsit</p>
-        <p style={styles.emptySubtitle}>Încearcă alte cuvinte cheie sau o altă categorie.</p>
+      <div style={S.empty}>
+        <div style={S.emptyIcon}>🔍</div>
+        <p style={S.emptyTitle}>Niciun produs găsit</p>
+        <p style={S.emptySub}>Încearcă alte cuvinte cheie sau o altă categorie.</p>
       </div>
     );
   }
 
   return (
     <div>
-      <div style={styles.topBar}>
-        <span style={styles.info}>{total} produse</span>
+      <div style={S.topBar}>
+        <span style={S.count}>{total} produse</span>
         {totalPages > 1 && (
-          <span style={styles.pageInfo}>Pagina {page} din {totalPages}</span>
+          <span style={S.pageLabel}>Pagina {page} / {totalPages}</span>
         )}
       </div>
 
       <div className="products-grid">
-        {products.map((product, i) => (
-          <ProductCard key={product.id} product={product} index={i} />
-        ))}
+        {products.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
       </div>
 
       {totalPages > 1 && (
-        <div style={styles.pagination}>
+        <div style={S.pager}>
           <button
             onClick={() => onPageChange(page - 1)}
             disabled={page === 1}
-            style={{ ...styles.pageBtn, opacity: page === 1 ? 0.4 : 1 }}
+            style={{ ...S.arrowBtn, opacity: page === 1 ? 0.35 : 1 }}
           >
             ← Anterior
           </button>
 
-          <div style={styles.pageDots}>
+          <div style={S.dots}>
             {Array.from({ length: Math.min(totalPages, 7) }).map((_, i) => {
               const p = i + 1;
+              const active = page === p;
               return (
                 <button
                   key={p}
                   onClick={() => onPageChange(p)}
-                  style={{
-                    ...styles.pageDot,
-                    ...(page === p ? styles.pageDotActive : {})
-                  }}
+                  style={{ ...S.dot, ...(active ? S.dotActive : {}) }}
                 >
                   {p}
                 </button>
@@ -108,7 +110,7 @@ const ProductGrid = ({ products, loading, total, page, onPageChange }) => {
           <button
             onClick={() => onPageChange(page + 1)}
             disabled={page === totalPages}
-            style={{ ...styles.pageBtn, opacity: page === totalPages ? 0.4 : 1 }}
+            style={{ ...S.arrowBtn, opacity: page === totalPages ? 0.35 : 1 }}
           >
             Următor →
           </button>
@@ -118,72 +120,69 @@ const ProductGrid = ({ products, loading, total, page, onPageChange }) => {
   );
 };
 
-const styles = {
+const S = {
   topBar: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '16px 24px 4px',
+    padding: '20px 32px 8px',
   },
-  info: {
-    fontSize: '13px',
-    color: '#64748b',
-    fontWeight: '500',
-    fontFamily: "'DM Sans', sans-serif",
-  },
-  pageInfo: {
+  count: {
     fontSize: '13px',
     color: '#94a3b8',
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
+    fontWeight: '500',
+  },
+  pageLabel: {
+    fontSize: '13px',
+    color: '#cbd5e1',
+    fontFamily: "'Outfit', sans-serif",
   },
   empty: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: '80px 24px',
+    padding: '100px 24px',
     gap: '12px',
-    animation: 'fadeUp 0.4s ease both',
+    animation: 'cardIn 0.4s ease both',
   },
+  emptyIcon: { fontSize: '56px', marginBottom: '8px' },
   emptyTitle: {
     fontSize: '18px',
     fontWeight: '600',
     color: '#334155',
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
   },
-  emptySubtitle: {
+  emptySub: {
     fontSize: '14px',
     color: '#94a3b8',
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
   },
-  pagination: {
+  pager: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     gap: '12px',
-    padding: '32px 24px',
+    padding: '40px 24px',
     flexWrap: 'wrap',
   },
-  pageBtn: {
-    padding: '9px 20px',
-    borderRadius: '10px',
+  arrowBtn: {
+    padding: '10px 22px',
+    borderRadius: '12px',
     border: '1.5px solid #e2e8f0',
     background: 'white',
     cursor: 'pointer',
     fontSize: '13px',
     fontWeight: '600',
     color: '#334155',
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
     transition: 'all 0.15s',
   },
-  pageDots: {
-    display: 'flex',
-    gap: '4px',
-  },
-  pageDot: {
-    width: '36px',
-    height: '36px',
-    borderRadius: '8px',
+  dots: { display: 'flex', gap: '4px' },
+  dot: {
+    width: '38px',
+    height: '38px',
+    borderRadius: '10px',
     border: '1.5px solid #e2e8f0',
     background: 'white',
     cursor: 'pointer',
@@ -193,14 +192,15 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
     transition: 'all 0.15s',
   },
-  pageDotActive: {
-    background: '#2563eb',
-    border: '1.5px solid #2563eb',
+  dotActive: {
+    background: '#0f172a',
+    border: '1.5px solid #0f172a',
     color: 'white',
     fontWeight: '700',
+    boxShadow: '0 2px 8px rgba(15,23,42,0.2)',
   },
 };
 

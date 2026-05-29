@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: rasa-server
+    runtime: docker
+    dockerfilePath: ./rasa/Dockerfile
+    envVars:
+      - key: ACTIONS_URL
+        value: https://actions-server.onrender.com
+      - key: DB_HOST
+        fromDatabase:
+          name: chatbot-db
+          property: host
+
+  - type: web
+    name: actions-server
+    runtime: docker
+    dockerfilePath: ./rasa/Dockerfile.actions
+    envVars:
+      - key: DB_HOST
+        value: your-railway-host

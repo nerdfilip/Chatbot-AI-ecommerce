@@ -1,11 +1,11 @@
 action_endpoint:
-  url: "${ACTIONS_URL}/webhook"
+  url: "http://localhost:5055/webhook"
 
 tracker_store:
   type: SQL
   dialect: postgresql
-  url: "${DB_HOST}"
-  port: "${DB_PORT}"
-  db: "${DB_NAME}"
-  username: "${DB_USER}"
-  password: "${DB_PASSWORD}"
+  url: localhost
+  port: 5432
+  db: chatbot_db
+  username: postgres
+  password: postgres

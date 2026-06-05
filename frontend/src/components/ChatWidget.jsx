@@ -29,6 +29,7 @@ const ChatWidget = () => {
   const [input, setInput]     = useState('');
   const [typing, setTyping]   = useState(false);
   const [showQR, setShowQR]   = useState(true);
+  const [showAgentConfirm, setShowAgentConfirm] = useState(false);
   const [locked, setLocked]   = useState(false);  // chat blocat dupa transfer
   const [showOverlay, setShowOverlay] = useState(false); // overlay blur
 
@@ -41,9 +42,24 @@ const ChatWidget = () => {
   }
   function nextId() { return idRef.current++; }
 
+  const scrollToBottom = useCallback((behavior = 'smooth') => {
+    bottomRef.current?.scrollIntoView({ behavior, block: 'end' });
+  }, []);
+
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, typing]);
+    scrollToBottom('smooth');
+  }, [messages, typing, scrollToBottom]);
+
+  useEffect(() => {
+    if (!open || !isMobile) return undefined;
+
+    const handleViewportShift = () => {
+      scrollToBottom('smooth');
+    };
+
+    window.addEventListener('resize', handleViewportShift);
+    return () => window.removeEventListener('resize', handleViewportShift);
+  }, [open, isMobile, scrollToBottom]);
 
   useEffect(() => {
     if (open && !locked) setTimeout(() => inputRef.current?.focus(), 200);
@@ -66,6 +82,11 @@ const ChatWidget = () => {
     sendMessage(txt, (msg) => {
       setTyping(false);
 
+      const needsAgentConfirm = msg.text && (
+        msg.text.includes('Aveti nevoie de ajutorul unui agent uman') ||
+        msg.text.includes('Doriti sa va transfer la un agent')
+      );
+
       // detecteaza mesajul real de transfer
       const isRealTransfer = msg.text && (
         msg.text.includes('Va transfer catre un agent uman') ||
@@ -74,6 +95,7 @@ const ChatWidget = () => {
       );
 
       if (isRealTransfer) {
+        setShowAgentConfirm(false);
         pushMsg({ ...msg, sender: 'bot' });
         // dupa 3 secunde, bloc chat si arata overlay
         setTimeout(() => {
@@ -82,6 +104,10 @@ const ChatWidget = () => {
         }, 3000);
       } else {
         pushMsg({ ...msg, sender: 'bot' });
+        if (needsAgentConfirm) {
+          setShowAgentConfirm(true);
+          setShowQR(false);
+        }
       }
     });
   }, [input, locked, pushMsg]);
@@ -181,7 +207,7 @@ const ChatWidget = () => {
           </div>
 
           {/* Quick replies — ascunse daca e locked */}
-          {showQR && !locked && (
+          {showQR && !locked && !showAgentConfirm && (
             <div style={S.qrWrap}>
               <p style={S.qrLabel}>Subiecte frecvente</p>
               <div style={S.qrList}>
@@ -194,6 +220,30 @@ const ChatWidget = () => {
             </div>
           )}
 
+          {showAgentConfirm && !locked && (
+            <div style={S.agentConfirmWrap}>
+              <button
+                style={{ ...S.agentConfirmBtn, ...S.agentConfirmAccept }}
+                onClick={() => {
+                  setShowAgentConfirm(false);
+                  handleSend('da, vreau un agent uman');
+                }}
+              >
+                ✓ Da, vreau un agent uman
+              </button>
+              <button
+                style={{ ...S.agentConfirmBtn, ...S.agentConfirmDecline }}
+                onClick={() => {
+                  setShowAgentConfirm(false);
+                  setShowQR(true);
+                  pushMsg({ text: 'Ok, cu ce altceva va pot ajuta?', sender: 'bot' });
+                }}
+              >
+                ✗ Nu, multumesc
+              </button>
+            </div>
+          )}
+
           {/* Banner blocat */}
           {locked && (
             <div style={S.lockedBanner}>
@@ -202,26 +252,43 @@ const ChatWidget = () => {
           )}
 
           {/* Input */}
-          <div style={{ ...S.inputWrap, opacity: locked ? 0.45 : 1 }}>
-            <input
-              ref={inputRef}
-              value={input}
-              onChange={e => !locked && setInput(e.target.value)}
-              onKeyDown={handleKey}
-              placeholder={locked ? 'Chat blocat — agent uman preluat' : 'Scrieti un mesaj...'}
-              style={{ ...S.input, cursor: locked ? 'not-allowed' : 'text', background: locked ? '#f1f5f9' : '#fafbfc' }}
-              disabled={locked}
-            />
-            <button
-              onClick={() => !locked && handleSend()}
-              disabled={!input.trim() || locked}
-              style={{ ...S.sendBtn, opacity: (!input.trim() || locked) ? 0.4 : 1, cursor: locked ? 'not-allowed' : 'pointer' }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m22 2-7 20-4-9-9-4 20-7z" /><path d="M22 2 11 13" />
-              </svg>
-            </button>
-          </div>
+          {!showAgentConfirm && (
+            <div style={{ ...S.inputWrap, opacity: locked ? 0.45 : 1 }}>
+              <input
+                ref={inputRef}
+                value={input}
+                onChange={e => {
+                  if (locked) return;
+                  setInput(e.target.value);
+                  if (isMobile) {
+                    inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                    scrollToBottom('smooth');
+                  }
+                }}
+                onFocus={() => {
+                  if (!isMobile) return;
+                  scrollToBottom('smooth');
+                  inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }}
+                onKeyDown={handleKey}
+                placeholder={locked ? '...' : 'Scrieti un mesaj...'}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="sentences"
+                style={{ ...S.input, cursor: locked ? 'not-allowed' : 'text', background: locked ? '#f1f5f9' : '#fafbfc' }}
+                disabled={locked}
+              />
+              <button
+                onClick={() => !locked && handleSend()}
+                disabled={!input.trim() || locked}
+                style={{ ...S.sendBtn, opacity: (!input.trim() || locked) ? 0.4 : 1, cursor: locked ? 'not-allowed' : 'pointer' }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m22 2-7 20-4-9-9-4 20-7z" /><path d="M22 2 11 13" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -381,6 +448,35 @@ const S = {
     fontSize: '12px', fontWeight: '600', padding: '8px 14px',
     fontFamily: "'Outfit', sans-serif", flexShrink: 0,
     animation: 'lockedPulse 2s ease infinite',
+  },
+  agentConfirmWrap: {
+    padding: '12px',
+    gap: '8px',
+    display: 'flex',
+    flexDirection: 'column',
+    background: 'white',
+    borderTop: '1px solid #f1f5f9',
+    flexShrink: 0,
+  },
+  agentConfirmBtn: {
+    width: '100%',
+    padding: '12px',
+    borderRadius: '12px',
+    fontSize: '14px',
+    fontWeight: '600',
+    fontFamily: "'Outfit', sans-serif",
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
+  agentConfirmAccept: {
+    background: '#0f172a',
+    color: 'white',
+    border: 'none',
+  },
+  agentConfirmDecline: {
+    background: 'white',
+    color: '#0f172a',
+    border: '1.5px solid #e2e8f0',
   },
   qrWrap: {
     padding: '10px 14px', borderTop: '1px solid #f1f5f9',

@@ -18,6 +18,19 @@ const TypingDots = () => (
   </div>
 );
 
+const AgentWaiting = () => (
+  <div style={S.waitingWrap}>
+    <span style={S.waitingText}>🔄 Se conectează la un agent uman</span>
+    <span style={S.waitingDotsWrap} aria-hidden="true">
+      {[0, 1, 2].map((i) => (
+        <span key={i} style={{ ...S.waitingDot, animationDelay: `${i * 180}ms` }} />
+      ))}
+    </span>
+  </div>
+);
+
+const ESCALATE_TEXT = 'Va transfer catre un agent uman';
+
 const ChatWidget = () => {
   const [open, setOpen]             = useState(false);
   const [messages, setMessages]     = useState([{
@@ -29,6 +42,7 @@ const ChatWidget = () => {
   const [input, setInput]     = useState('');
   const [typing, setTyping]   = useState(false);
   const [showQR, setShowQR]   = useState(true);
+  const [locked, setLocked] = useState(false);
   const bottomRef = useRef(null);
   const inputRef  = useRef(null);
   const idRef     = useRef(1);
@@ -52,6 +66,7 @@ const ChatWidget = () => {
   }, []);
 
   const handleSend = useCallback((text, fromQR = false) => {
+    if (locked) return;
     const txt = (text || input).trim();
     if (!txt) return;
     if (fromQR) setShowQR(false);
@@ -62,21 +77,24 @@ const ChatWidget = () => {
 
     sendMessage(txt, (msg) => {
       setTyping(false);
-      const isTransfer = /transfer|agent|operator/i.test(msg.text || '');
+      const isTransfer = (msg.text || '').toLowerCase().includes(ESCALATE_TEXT.toLowerCase());
 
       if (isTransfer) {
+        setLocked(true);
+        setShowQR(false);
         setMessages(prev => [
           ...prev,
-          { id: nextId(), text: '🔄 Conectare la agent...', sender: 'bot', isTransfer: true, time: now() },
+          { id: nextId(), text: '🔄 Se conectează la un agent uman...', sender: 'bot', isTransfer: true, isTransferWaiting: true, time: now() },
           { id: nextId(), ...msg, time: now() },
         ]);
       } else {
         pushMsg({ ...msg, sender: 'bot' });
       }
     });
-  }, [input, pushMsg]);
+  }, [input, locked, pushMsg]);
 
   const handleKey = (e) => {
+    if (locked) return;
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
@@ -134,7 +152,11 @@ const ChatWidget = () => {
                     : msg.isTransfer ? S.transferB
                     : S.botB),
                 }}>
-                  <span style={{ whiteSpace: 'pre-line', lineHeight: 1.55 }}>{msg.text}</span>
+                  {msg.isTransferWaiting ? (
+                    <AgentWaiting />
+                  ) : (
+                    <span style={{ whiteSpace: 'pre-line', lineHeight: 1.55 }}>{msg.text}</span>
+                  )}
                   <span style={S.ts}>{msg.time}</span>
                 </div>
               </div>
@@ -152,7 +174,7 @@ const ChatWidget = () => {
           </div>
 
           {/* Quick replies */}
-          {showQR && (
+          {showQR && !locked && (
             <div style={S.qrWrap}>
               <p style={S.qrLabel}>Subiecte frecvente</p>
               <div style={S.qrList}>
@@ -165,6 +187,10 @@ const ChatWidget = () => {
             </div>
           )}
 
+          {locked && (
+            <div style={S.lockBanner}>🔄 Agent uman preluat — chat blocat</div>
+          )}
+
           {/* Input */}
           <div style={S.inputWrap}>
             <input
@@ -173,12 +199,13 @@ const ChatWidget = () => {
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKey}
               placeholder="Scrieți un mesaj..."
+              disabled={locked}
               style={S.input}
             />
             <button
               onClick={() => handleSend()}
-              disabled={!input.trim()}
-              style={{ ...S.sendBtn, opacity: input.trim() ? 1 : 0.4 }}
+              disabled={locked || !input.trim()}
+              style={{ ...S.sendBtn, opacity: (locked || !input.trim()) ? 0.4 : 1 }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="m22 2-7 20-4-9-9-4 20-7z" /><path d="M22 2 11 13" />
@@ -204,6 +231,18 @@ const ChatWidget = () => {
         @keyframes shimmer {
           0%   { background-position:-400px 0; }
           100% { background-position: 400px 0; }
+        }
+        @keyframes pulseAgent {
+          0%, 100% { opacity: 0.75; }
+          50%      { opacity: 1; }
+        }
+        @keyframes dotWave {
+          0%, 80%, 100% { transform: translateY(0); opacity: 0.35; }
+          40%           { transform: translateY(-3px); opacity: 1; }
+        }
+        @keyframes lockPulse {
+          0%, 100% { opacity: 1; }
+          50%      { opacity: 0.5; }
         }
       `}</style>
     </>
@@ -393,6 +432,31 @@ const S = {
     display: 'inline-block',
     animation: 'bounce 1.2s ease infinite',
   },
+  waitingWrap: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+  },
+  waitingText: {
+    whiteSpace: 'pre-line',
+    lineHeight: 1.55,
+    fontWeight: '600',
+    animation: 'pulseAgent 1.4s ease-in-out infinite',
+  },
+  waitingDotsWrap: {
+    display: 'inline-flex',
+    gap: '3px',
+    alignItems: 'center',
+    transform: 'translateY(1px)',
+  },
+  waitingDot: {
+    width: '5px',
+    height: '5px',
+    borderRadius: '50%',
+    background: '#92400e',
+    display: 'inline-block',
+    animation: 'dotWave 1.1s ease-in-out infinite',
+  },
   qrWrap: {
     padding: '10px 14px',
     borderTop: '1px solid #f1f5f9',
@@ -425,6 +489,18 @@ const S = {
     whiteSpace: 'nowrap',
     fontFamily: "'Outfit', sans-serif",
     transition: 'all 0.15s',
+  },
+  lockBanner: {
+    margin: '0 14px 8px',
+    background: '#fef3c7',
+    color: '#92400e',
+    border: '1px solid #fde68a',
+    padding: '8px 14px',
+    borderRadius: '8px',
+    textAlign: 'center',
+    fontSize: '13px',
+    animation: 'lockPulse 1.4s ease-in-out infinite',
+    fontFamily: "'Outfit', sans-serif",
   },
   inputWrap: {
     display: 'flex',

@@ -4,7 +4,7 @@ import psycopg2
 from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker, FormValidationAction
 from rasa_sdk.executor import CollectingDispatcher
-from rasa_sdk.events import SlotSet
+from rasa_sdk.events import SlotSet, FollowupAction
 from rasa_sdk.types import DomainDict
 
 # ── Conexiune PostgreSQL ──────────────────────────────────────────
@@ -183,6 +183,12 @@ class ActionTrackOrder(Action):
 
         order_id = tracker.get_slot("order_id")
         email    = tracker.get_slot("email")
+        latest_text = (tracker.latest_message.get("text") or "").lower()
+        delivered_not_arrived = bool(re.search(
+            r"(nu\s+a\s+ajuns|nu\s+am\s+primit|n-am\s+primit|n.?am\s+primit|didn'?t\s+arrive|not\s+arrived|missing)",
+            latest_text,
+            re.IGNORECASE,
+        ))
 
         # normalizeaza: 017 -> ORD017
         if order_id:
@@ -240,6 +246,20 @@ class ActionTrackOrder(Action):
                 tracking  = tracking_code if tracking_code else "Nedisponibil"
 
                 if status == "delivered":
+                    if delivered_not_arrived:
+                        dispatcher.utter_message(
+                            text="Comanda #{}\n"
+                                 "Status: {} \u2713\n"
+                                 "Data livrare estimata: {}\n"
+                                 "Cod tracking: {}\n\n"
+                                 "Inteleg ca nu a ajuns coletul, desi apare livrat.\n"
+                                 "Va rugam sa verificati la vecini sau la asociatia de bloc.\n"
+                                 "Folositi codul de tracking ({}) si sunati direct la agentia de curierat pentru confirmare.".format(oid, status_ro, data, tracking, tracking)
+                        )
+                        dispatcher.utter_message(
+                            text="Va transfer acum catre un agent uman pentru investigatie si asistenta dedicata."
+                        )
+                        return [FollowupAction("action_escalate")]
                     dispatcher.utter_message(
                         text="Comanda #{}\n"
                              "Status: {} \u2713\n"
@@ -272,8 +292,9 @@ class ActionTrackOrder(Action):
                         text="Comanda #{}\n"
                              "Status: {} \u2717\n\n"
                              "Comanda a fost anulata.\n"
-                             "Daca doriti rambursarea sau aveti intrebari,\n"
-                             "scrieti 'vreau ajutor'.".format(oid, status_ro)
+                             "Daca aceasta anulare va surprinde, este posibil sa fi fost anulata din greseala.\n"
+                             "Puteti plasa oricand o comanda noua pe site.\n"
+                             "Va rugam sa plasati o noua comanda pe site.".format(oid, status_ro)
                     )
                 else:
                     dispatcher.utter_message(
@@ -440,7 +461,7 @@ class ActionCancelOrder(Action):
             elif status == "canceled":
                 dispatcher.utter_message(
                     text="Comanda #{} este deja anulata.\n"
-                         "Daca aveti intrebari despre rambursare, scrieti 'vreau ajutor'.".format(order_id)
+                         "Daca ati anulat-o din greseala, va rugam sa plasati o noua comanda pe site.".format(order_id)
                 )
             else:
                 dispatcher.utter_message(
@@ -639,12 +660,10 @@ class ActionPaymentHelp(Action):
 
         dispatcher.utter_message(
             text="Pentru probleme de plata, iata pasii recomandati:\n\n"
-                 "Card refuzat - verificati daca aveti fonduri suficiente\n"
-                 "   si daca platile online sunt activate\n"
+                 "Card refuzat - verificati daca aveti fonduri suficiente si daca platile online sunt activate\n"
                  "Debit dublu - suma va fi returnata automat in 3-5 zile lucratoare\n"
-                 "Factura lipsa - verificati folderul Spam\n"
-                 "   sau solicitati retransmiterea\n\n"
-                 "Doriti sa va transfer catre un agent specializat?"
+                 "Factura lipsa - verificati folderul Spam sau solicitati retransmiterea\n\n"
+                 "Aveti nevoie de ajutorul unui agent uman?"
         )
         return []
 

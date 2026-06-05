@@ -19,19 +19,19 @@ const TypingDots = () => (
 );
 
 const ChatWidget = () => {
-  const [open, setOpen]           = useState(false);
-  const [messages, setMessages]   = useState([{
+  const [open, setOpen]               = useState(false);
+  const [messages, setMessages]       = useState([{
     id: 0,
     text: 'Buna ziua! Sunt Asisto, asistentul virtual FilipShop. Cu ce va pot ajuta astazi?',
     sender: 'bot',
     time: now(),
   }]);
-  const [input, setInput]     = useState('');
-  const [typing, setTyping]   = useState(false);
-  const [showQR, setShowQR]   = useState(true);
+  const [input, setInput]             = useState('');
+  const [typing, setTyping]           = useState(false);
+  const [showQR, setShowQR]           = useState(true);
+  const [locked, setLocked]           = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
   const [showAgentConfirm, setShowAgentConfirm] = useState(false);
-  const [locked, setLocked]   = useState(false);  // chat blocat dupa transfer
-  const [showOverlay, setShowOverlay] = useState(false); // overlay blur
 
   const bottomRef = useRef(null);
   const inputRef  = useRef(null);
@@ -42,28 +42,26 @@ const ChatWidget = () => {
   }
   function nextId() { return idRef.current++; }
 
-  const scrollToBottom = useCallback((behavior = 'smooth') => {
-    bottomRef.current?.scrollIntoView({ behavior, block: 'end' });
-  }, []);
-
   useEffect(() => {
-    scrollToBottom('smooth');
-  }, [messages, typing, scrollToBottom]);
-
-  useEffect(() => {
-    if (!open || !isMobile) return undefined;
-
-    const handleViewportShift = () => {
-      scrollToBottom('smooth');
-    };
-
-    window.addEventListener('resize', handleViewportShift);
-    return () => window.removeEventListener('resize', handleViewportShift);
-  }, [open, isMobile, scrollToBottom]);
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, typing, showAgentConfirm]);
 
   useEffect(() => {
     if (open && !locked) setTimeout(() => inputRef.current?.focus(), 200);
   }, [open, locked]);
+
+  // fix mobil: cand se deschide tastatura, scroll la bottom
+  useEffect(() => {
+    const handleResize = () => {
+      if (document.activeElement === inputRef.current) {
+        setTimeout(() => {
+          bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const pushMsg = useCallback((msg) => {
     setMessages(prev => [...prev, { ...msg, id: nextId(), time: now() }]);
@@ -82,32 +80,30 @@ const ChatWidget = () => {
     sendMessage(txt, (msg) => {
       setTyping(false);
 
-      const needsAgentConfirm = msg.text && (
-        msg.text.includes('Aveti nevoie de ajutorul unui agent uman') ||
-        msg.text.includes('Doriti sa va transfer la un agent')
-      );
+      const msgText = msg.text || '';
 
-      // detecteaza mesajul real de transfer
-      const isRealTransfer = msg.text && (
-        msg.text.includes('Va transfer catre un agent uman') ||
-        msg.text.includes('transfer catre un agent') ||
-        msg.text.includes('Timp estimat de asteptare')
-      );
+      // mesaj real de transfer -> overlay + lock dupa 3s
+      const isRealTransfer =
+        msgText.includes('Va transfer catre un agent uman') ||
+        msgText.includes('Timp estimat de asteptare');
 
-      if (isRealTransfer) {
+      // mesaj care intreaba daca vrea agent -> butoane confirm
+      const isAgentQuestion =
+        msgText.includes('Aveti nevoie de ajutorul unui agent') ||
+        msgText.includes('Doriti sa va transfer la un agent') ||
+        msgText.includes('Doriti sa va transfer catre un agent');
+
+      pushMsg({ ...msg, sender: 'bot' });
+
+      if (isAgentQuestion) {
+        setShowQR(false);
+        setShowAgentConfirm(true);
+      } else if (isRealTransfer) {
         setShowAgentConfirm(false);
-        pushMsg({ ...msg, sender: 'bot' });
-        // dupa 3 secunde, bloc chat si arata overlay
         setTimeout(() => {
           setLocked(true);
           setShowOverlay(true);
         }, 3000);
-      } else {
-        pushMsg({ ...msg, sender: 'bot' });
-        if (needsAgentConfirm) {
-          setShowAgentConfirm(true);
-          setShowQR(false);
-        }
       }
     });
   }, [input, locked, pushMsg]);
@@ -117,6 +113,17 @@ const ChatWidget = () => {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const handleAcceptAgent = () => {
+    setShowAgentConfirm(false);
+    handleSend('da, vreau un agent uman');
+  };
+
+  const handleRefuseAgent = () => {
+    setShowAgentConfirm(false);
+    setShowQR(true);
+    pushMsg({ text: 'Ok! Cu ce altceva va pot ajuta?', sender: 'bot' });
   };
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 520;
@@ -138,6 +145,7 @@ const ChatWidget = () => {
 
       {open && (
         <div style={windowStyle}>
+
           {/* Header */}
           <div style={S.header}>
             <div style={S.hLeft}>
@@ -145,7 +153,7 @@ const ChatWidget = () => {
               <div>
                 <div style={S.hName}>Asisto</div>
                 <div style={S.hStatus}>
-                  <span style={locked ? S.hDotRed : S.hDot} />
+                  <span style={locked ? S.hDotAmber : S.hDotGreen} />
                   {locked ? 'Agent preluat' : 'Online acum'}
                 </div>
               </div>
@@ -157,8 +165,8 @@ const ChatWidget = () => {
             </button>
           </div>
 
-          {/* Messages area — cu blur overlay daca e locked */}
-          <div style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
+          {/* Messages + overlay */}
+          <div style={{ position: 'relative', flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <div style={S.msgs}>
               {messages.map((msg) => (
                 <div key={msg.id} style={{
@@ -166,15 +174,13 @@ const ChatWidget = () => {
                   justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start',
                 }}>
                   {msg.sender === 'bot' && <div style={S.botAv}>A</div>}
-                  <div style={{
-                    ...S.bubble,
-                    ...(msg.sender === 'user' ? S.userB : S.botB),
-                  }}>
+                  <div style={{ ...S.bubble, ...(msg.sender === 'user' ? S.userB : S.botB) }}>
                     <span style={{ whiteSpace: 'pre-line', lineHeight: 1.55 }}>{msg.text}</span>
                     <span style={S.ts}>{msg.time}</span>
                   </div>
                 </div>
               ))}
+
               {typing && (
                 <div style={{ ...S.row, justifyContent: 'flex-start' }}>
                   <div style={S.botAv}>A</div>
@@ -186,18 +192,16 @@ const ChatWidget = () => {
               <div ref={bottomRef} />
             </div>
 
-            {/* OVERLAY BLUR + mesaj transfer */}
+            {/* OVERLAY transfer */}
             {showOverlay && (
               <div style={S.overlay}>
                 <div style={S.overlayCard}>
-                  <div style={S.overlaySpinner}>
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="10" stroke="#e2e8f0" strokeWidth="3"/>
-                      <path d="M12 2a10 10 0 0 1 10 10" stroke="#0f172a" strokeWidth="3" strokeLinecap="round"
-                        style={{ animation: 'spinAnim 1s linear infinite', transformOrigin: 'center' }}
-                      />
-                    </svg>
-                  </div>
+                  <svg width="44" height="44" viewBox="0 0 24 24" fill="none" style={{ marginBottom: '4px' }}>
+                    <circle cx="12" cy="12" r="10" stroke="#e2e8f0" strokeWidth="3"/>
+                    <path d="M12 2a10 10 0 0 1 10 10" stroke="#0f172a" strokeWidth="3" strokeLinecap="round"
+                      style={{ animation: 'spinAnim 1s linear infinite', transformOrigin: 'center' }}
+                    />
+                  </svg>
                   <p style={S.overlayTitle}>Transfer catre agent uman</p>
                   <p style={S.overlaySub}>Va rugam sa asteptati...</p>
                   <p style={S.overlaySub2}>Timp estimat: 5-10 minute</p>
@@ -206,7 +210,20 @@ const ChatWidget = () => {
             )}
           </div>
 
-          {/* Quick replies — ascunse daca e locked */}
+          {/* BUTOANE CONFIRMARE AGENT */}
+          {showAgentConfirm && !locked && (
+            <div style={S.confirmWrap}>
+              <p style={S.confirmLabel}>Doriti sa fiti conectat cu un agent uman?</p>
+              <button onClick={handleAcceptAgent} style={S.acceptBtn}>
+                ✓ Da, vreau un agent uman
+              </button>
+              <button onClick={handleRefuseAgent} style={S.refuseBtn}>
+                ✗ Nu, multumesc
+              </button>
+            </div>
+          )}
+
+          {/* QUICK REPLIES */}
           {showQR && !locked && !showAgentConfirm && (
             <div style={S.qrWrap}>
               <p style={S.qrLabel}>Subiecte frecvente</p>
@@ -220,68 +237,47 @@ const ChatWidget = () => {
             </div>
           )}
 
-          {showAgentConfirm && !locked && (
-            <div style={S.agentConfirmWrap}>
-              <button
-                style={{ ...S.agentConfirmBtn, ...S.agentConfirmAccept }}
-                onClick={() => {
-                  setShowAgentConfirm(false);
-                  handleSend('da, vreau un agent uman');
-                }}
-              >
-                ✓ Da, vreau un agent uman
-              </button>
-              <button
-                style={{ ...S.agentConfirmBtn, ...S.agentConfirmDecline }}
-                onClick={() => {
-                  setShowAgentConfirm(false);
-                  setShowQR(true);
-                  pushMsg({ text: 'Ok, cu ce altceva va pot ajuta?', sender: 'bot' });
-                }}
-              >
-                ✗ Nu, multumesc
-              </button>
-            </div>
-          )}
-
-          {/* Banner blocat */}
+          {/* BANNER BLOCAT */}
           {locked && (
             <div style={S.lockedBanner}>
               🔒 Chat blocat — agent uman preluat
             </div>
           )}
 
-          {/* Input */}
+          {/* INPUT */}
           {!showAgentConfirm && (
             <div style={{ ...S.inputWrap, opacity: locked ? 0.45 : 1 }}>
               <input
                 ref={inputRef}
                 value={input}
                 onChange={e => {
-                  if (locked) return;
-                  setInput(e.target.value);
-                  if (isMobile) {
-                    inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                    scrollToBottom('smooth');
+                  if (!locked) {
+                    setInput(e.target.value);
+                    // scroll pe mobil cand scrii
+                    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
                   }
                 }}
-                onFocus={() => {
-                  if (!isMobile) return;
-                  scrollToBottom('smooth');
-                  inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                }}
                 onKeyDown={handleKey}
-                placeholder={locked ? '...' : 'Scrieti un mesaj...'}
+                onFocus={() => setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 300)}
+                placeholder={locked ? 'Chat blocat — agent uman preluat' : 'Scrieti un mesaj...'}
+                style={{
+                  ...S.input,
+                  cursor: locked ? 'not-allowed' : 'text',
+                  background: locked ? '#f1f5f9' : '#fafbfc',
+                }}
+                disabled={locked}
                 autoComplete="off"
                 autoCorrect="off"
                 autoCapitalize="sentences"
-                style={{ ...S.input, cursor: locked ? 'not-allowed' : 'text', background: locked ? '#f1f5f9' : '#fafbfc' }}
-                disabled={locked}
               />
               <button
                 onClick={() => !locked && handleSend()}
                 disabled={!input.trim() || locked}
-                style={{ ...S.sendBtn, opacity: (!input.trim() || locked) ? 0.4 : 1, cursor: locked ? 'not-allowed' : 'pointer' }}
+                style={{
+                  ...S.sendBtn,
+                  opacity: (!input.trim() || locked) ? 0.4 : 1,
+                  cursor: locked ? 'not-allowed' : 'pointer',
+                }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="m22 2-7 20-4-9-9-4 20-7z" /><path d="M22 2 11 13" />
@@ -294,32 +290,36 @@ const ChatWidget = () => {
 
       <style>{`
         @keyframes msgIn {
-          from { opacity:0; transform: translateY(8px) scale(0.97); }
-          to   { opacity:1; transform: translateY(0) scale(1); }
+          from { opacity:0; transform:translateY(8px) scale(0.97); }
+          to   { opacity:1; transform:translateY(0) scale(1); }
         }
         @keyframes chatPop {
-          from { opacity:0; transform: scale(0.88) translateY(24px); }
-          to   { opacity:1; transform: scale(1) translateY(0); }
+          from { opacity:0; transform:scale(0.88) translateY(24px); }
+          to   { opacity:1; transform:scale(1) translateY(0); }
         }
         @keyframes bounce {
           0%,80%,100% { transform:translateY(0); opacity:0.4; }
           40%          { transform:translateY(-5px); opacity:1; }
         }
         @keyframes spinAnim {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
+          from { transform:rotate(0deg); }
+          to   { transform:rotate(360deg); }
         }
         @keyframes overlayIn {
           from { opacity:0; }
           to   { opacity:1; }
         }
         @keyframes cardIn {
-          from { opacity:0; transform: scale(0.88) translateY(16px); }
-          to   { opacity:1; transform: scale(1) translateY(0); }
+          from { opacity:0; transform:scale(0.88) translateY(16px); }
+          to   { opacity:1; transform:scale(1) translateY(0); }
         }
         @keyframes lockedPulse {
           0%,100% { opacity:1; }
           50%     { opacity:0.6; }
+        }
+        @keyframes confirmIn {
+          from { opacity:0; transform:translateY(12px); }
+          to   { opacity:1; transform:translateY(0); }
         }
       `}</style>
     </>
@@ -333,7 +333,7 @@ const S = {
     border: 'none', borderRadius: '50%',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     cursor: 'pointer', boxShadow: '0 8px 24px rgba(15,23,42,0.35)',
-    zIndex: 1000, transition: 'transform 0.2s, box-shadow 0.2s',
+    zIndex: 1000,
   },
   fabDot: {
     position: 'absolute', top: '6px', right: '6px',
@@ -365,11 +365,11 @@ const S = {
     color: 'rgba(255,255,255,0.6)', fontSize: '12px',
     display: 'flex', alignItems: 'center', gap: '5px', fontFamily: "'Outfit', sans-serif",
   },
-  hDot: {
+  hDotGreen: {
     width: '7px', height: '7px', borderRadius: '50%',
     background: '#22c55e', boxShadow: '0 0 0 2px rgba(34,197,94,0.3)',
   },
-  hDotRed: {
+  hDotAmber: {
     width: '7px', height: '7px', borderRadius: '50%',
     background: '#f59e0b', boxShadow: '0 0 0 2px rgba(245,158,11,0.3)',
     animation: 'lockedPulse 1.5s ease infinite',
@@ -382,7 +382,7 @@ const S = {
   msgs: {
     flex: 1, overflowY: 'auto', padding: '16px 14px',
     display: 'flex', flexDirection: 'column', gap: '10px',
-    background: '#fafbfc', height: '100%',
+    background: '#fafbfc',
   },
   row: {
     display: 'flex', alignItems: 'flex-end', gap: '8px',
@@ -413,14 +413,12 @@ const S = {
     width: '7px', height: '7px', borderRadius: '50%', background: '#94a3b8',
     display: 'inline-block', animation: 'bounce 1.2s ease infinite',
   },
-  // OVERLAY
   overlay: {
     position: 'absolute', inset: 0,
     backdropFilter: 'blur(6px)',
     background: 'rgba(15,23,42,0.45)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    zIndex: 10,
-    animation: 'overlayIn 0.5s ease both',
+    zIndex: 10, animation: 'overlayIn 0.5s ease both',
   },
   overlayCard: {
     background: 'white', borderRadius: '18px',
@@ -430,54 +428,37 @@ const S = {
     animation: 'cardIn 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.2s both',
     minWidth: '240px',
   },
-  overlaySpinner: { marginBottom: '4px' },
   overlayTitle: {
     fontSize: '16px', fontWeight: '700', color: '#0f172a',
     fontFamily: "'Outfit', sans-serif", letterSpacing: '-0.3px',
   },
-  overlaySub: {
-    fontSize: '13px', color: '#64748b', fontFamily: "'Outfit', sans-serif",
+  overlaySub: { fontSize: '13px', color: '#64748b', fontFamily: "'Outfit', sans-serif" },
+  overlaySub2: { fontSize: '12px', color: '#94a3b8', fontFamily: "'Outfit', sans-serif" },
+  // CONFIRM BUTOANE
+  confirmWrap: {
+    padding: '14px 14px 10px',
+    display: 'flex', flexDirection: 'column', gap: '8px',
+    borderTop: '1px solid #f1f5f9', background: 'white', flexShrink: 0,
+    animation: 'confirmIn 0.3s ease both',
   },
-  overlaySub2: {
-    fontSize: '12px', color: '#94a3b8', fontFamily: "'Outfit', sans-serif",
+  confirmLabel: {
+    fontSize: '12px', color: '#64748b', fontFamily: "'Outfit', sans-serif",
+    textAlign: 'center', marginBottom: '2px',
   },
-  // BANNER BLOCAT
-  lockedBanner: {
-    background: '#fef3c7', borderTop: '1px solid #fde68a',
-    color: '#92400e', textAlign: 'center',
-    fontSize: '12px', fontWeight: '600', padding: '8px 14px',
-    fontFamily: "'Outfit', sans-serif", flexShrink: 0,
-    animation: 'lockedPulse 2s ease infinite',
+  acceptBtn: {
+    width: '100%', padding: '12px', borderRadius: '12px',
+    background: '#0f172a', color: 'white', border: 'none',
+    fontSize: '14px', fontWeight: '600', cursor: 'pointer',
+    fontFamily: "'Outfit', sans-serif", transition: 'opacity 0.15s',
   },
-  agentConfirmWrap: {
-    padding: '12px',
-    gap: '8px',
-    display: 'flex',
-    flexDirection: 'column',
-    background: 'white',
-    borderTop: '1px solid #f1f5f9',
-    flexShrink: 0,
-  },
-  agentConfirmBtn: {
-    width: '100%',
-    padding: '12px',
-    borderRadius: '12px',
-    fontSize: '14px',
-    fontWeight: '600',
-    fontFamily: "'Outfit', sans-serif",
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-  },
-  agentConfirmAccept: {
-    background: '#0f172a',
-    color: 'white',
-    border: 'none',
-  },
-  agentConfirmDecline: {
-    background: 'white',
-    color: '#0f172a',
+  refuseBtn: {
+    width: '100%', padding: '12px', borderRadius: '12px',
+    background: 'white', color: '#334155',
     border: '1.5px solid #e2e8f0',
+    fontSize: '14px', fontWeight: '600', cursor: 'pointer',
+    fontFamily: "'Outfit', sans-serif", transition: 'opacity 0.15s',
   },
+  // QUICK REPLIES
   qrWrap: {
     padding: '10px 14px', borderTop: '1px solid #f1f5f9',
     background: 'white', flexShrink: 0,
@@ -494,17 +475,22 @@ const S = {
     fontSize: '12px', fontWeight: '500', whiteSpace: 'nowrap',
     fontFamily: "'Outfit', sans-serif", transition: 'all 0.15s',
   },
+  lockedBanner: {
+    background: '#fef3c7', borderTop: '1px solid #fde68a',
+    color: '#92400e', textAlign: 'center',
+    fontSize: '12px', fontWeight: '600', padding: '8px 14px',
+    fontFamily: "'Outfit', sans-serif", flexShrink: 0,
+    animation: 'lockedPulse 2s ease infinite',
+  },
   inputWrap: {
     display: 'flex', padding: '12px 14px', gap: '8px',
     borderTop: '1px solid #f1f5f9', background: 'white',
-    flexShrink: 0, alignItems: 'center',
-    transition: 'opacity 0.3s',
+    flexShrink: 0, alignItems: 'center', transition: 'opacity 0.3s',
   },
   input: {
     flex: 1, padding: '11px 16px', borderRadius: '999px',
     border: '1.5px solid #e2e8f0', fontSize: '13.5px', outline: 'none',
-    color: '#0f172a', fontFamily: "'Outfit', sans-serif",
-    transition: 'all 0.2s',
+    color: '#0f172a', fontFamily: "'Outfit', sans-serif", transition: 'all 0.2s',
   },
   sendBtn: {
     width: '42px', height: '42px', borderRadius: '50%',

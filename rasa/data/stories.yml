@@ -44,11 +44,6 @@ stories:
     - intent: warranty_info
     - action: action_warranty_info
 
-- story: out of scope
-  steps:
-    - intent: out_of_scope
-    - action: utter_out_of_scope
-
 - story: la revedere
   steps:
     - intent: farewell

@@ -133,6 +133,7 @@ actions:
   - action_escalate
   - action_cancel_order
   - action_recommend_product
+  - action_fallback_llm
 
 session_config:
   session_expiration_time: 60

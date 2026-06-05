@@ -20,12 +20,12 @@ rules:
 - rule: out of scope
   steps:
     - intent: out_of_scope
-    - action: utter_out_of_scope
+    - action: action_fallback_llm
 
-- rule: fallback
+- rule: fallback cu Gemini LLM
   steps:
     - intent: nlu_fallback
-    - action: utter_fallback
+    - action: action_fallback_llm
 
 - rule: activare order form
   steps:
@@ -69,37 +69,6 @@ rules:
     - active_loop: null
     - action: action_check_stock
 
-- rule: bot challenge
-  steps:
-    - intent: bot_challenge
-    - action: utter_iamabot
-
-- rule: ask name
-  steps:
-    - intent: ask_name
-    - action: utter_name
-
-- rule: delivery problem cu slot deja setat
-  condition:
-    - slot_was_set:
-      - order_id: ORD017
-  steps:
-    - intent: delivery_problem
-    - action: action_delivery_help
-
-- rule: delivery problem dupa tracking
-  condition:
-    - slot_was_set:
-      - order_id: true
-  steps:
-    - intent: delivery_problem
-    - action: action_delivery_help
-
-- rule: delivery problem oricand
-  steps:
-    - intent: delivery_problem
-    - action: action_delivery_help
-
 - rule: activare cancel form
   steps:
     - intent: cancel_order
@@ -133,3 +102,8 @@ rules:
   steps:
     - intent: recommend_product
     - action: action_recommend_product
+
+- rule: delivery problem oricand
+  steps:
+    - intent: delivery_problem
+    - action: action_delivery_help

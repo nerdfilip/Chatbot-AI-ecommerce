@@ -25,6 +25,7 @@ entities:
   - email
   - product_name
   - product_category
+  - price
 
 slots:
   order_id:

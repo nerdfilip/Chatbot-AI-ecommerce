@@ -1251,4 +1251,32 @@ nlu:
     - ce produse aveti la telefoane
     - ce laptopuri aveti
 
-    
+- intent: recommend_product
+  examples: |
+    - recomanda-mi o cafetiera
+    - recomanda-mi o cafetiera sub [500](price) RON
+    - recomanda-mi un telefon
+    - recomanda-mi un telefon sub [1000](price) RON
+    - recomanda-mi un laptop
+    - recomanda-mi un laptop sub [3000](price) RON
+    - ce telefoane aveti in stoc
+    - ce laptopuri aveti disponibile
+    - ce produse aveti din gama Apple
+    - ce produse Apple aveti
+    - produse Samsung disponibile
+    - ce televizoare aveti
+    - vreau sa cumpar un telefon
+    - caut un laptop bun
+    - ce casti aveti
+    - recomanda-mi ceva pentru gaming
+    - ce aveti pentru gaming sub [2000](price) RON
+    - ce smartwatch-uri aveti
+    - produse disponibile categoria telefoane
+    - ce frigidere aveti
+    - recomanda-mi un espressor sub [800](price) RON
+    - ce tablete aveti in stoc
+    - vreau un monitor pentru birou
+    - caut ceva din gama Samsung
+    - ce produse Philips aveti
+    - recomanda-mi ceva bun de gatit
+    - ce aspiratoare aveti

@@ -6,13 +6,18 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-def get_db():
+# def get_db():
+#     return psycopg2.connect(
+#         host=os.getenv("DB_HOST", "localhost"),
+#         port=os.getenv("DB_PORT", "5432"),
+#         dbname=os.getenv("DB_NAME", "chatbot_db"),
+#         user=os.getenv("DB_USER", "postgres"),
+#         password=os.getenv("DB_PASSWORD", "postgres")
+#     )
+
+def get_db_connection():
     return psycopg2.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        port=os.getenv("DB_PORT", "5432"),
-        dbname=os.getenv("DB_NAME", "chatbot_db"),
-        user=os.getenv("DB_USER", "postgres"),
-        password=os.getenv("DB_PASSWORD", "postgres")
+        "postgresql://postgres:postgres123.@db.edpxrivqoveheytqsxlo.supabase.co:5432/postgres"
     )
 
 @app.route("/api/products", methods=["GET"])

@@ -1,0 +1,26 @@
+[
+  {
+    "text": "esti inteligent",
+    "intent": "out_of_scope",
+    "intent_prediction": {
+      "name": "bot_challenge",
+      "confidence": 0.49994707107543945
+    }
+  },
+  {
+    "text": "esti AI?",
+    "intent": "bot_challenge",
+    "intent_prediction": {
+      "name": "out_of_scope",
+      "confidence": 0.6124099493026733
+    }
+  },
+  {
+    "text": "esti ChatGPT?",
+    "intent": "bot_challenge",
+    "intent_prediction": {
+      "name": "out_of_scope",
+      "confidence": 0.5551685690879822
+    }
+  }
+]

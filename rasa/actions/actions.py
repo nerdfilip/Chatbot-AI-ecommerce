@@ -7,13 +7,18 @@ from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet, FollowupAction
 from rasa_sdk.types import DomainDict
 
+# def get_db_connection():
+#     return psycopg2.connect(
+#         host=os.getenv("DB_HOST", "localhost"),
+#         port=os.getenv("DB_PORT", "5432"),
+#         dbname=os.getenv("DB_NAME", "chatbot_db"),
+#         user=os.getenv("DB_USER", "postgres"),
+#         password=os.getenv("DB_PASSWORD", "postgres")
+#     )
+
 def get_db_connection():
     return psycopg2.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        port=os.getenv("DB_PORT", "5432"),
-        dbname=os.getenv("DB_NAME", "chatbot_db"),
-        user=os.getenv("DB_USER", "postgres"),
-        password=os.getenv("DB_PASSWORD", "postgres")
+        "postgresql://postgres:postgres123.@db.edpxrivqoveheytqsxlo.supabase.co:5432/postgres"
     )
 
 def normalize_order_id(value: str) -> str:
@@ -204,12 +209,12 @@ class ActionTrackOrder(Action):
                              "Daca nu ati primit coletul, verificati:\n"
                              "- La vecini sau la asociatia de bloc\n"
                              "- Codul de tracking pe site-ul curierului\n\n"
-                             "Daca tot nu il gasiti, scrieti 'vreau ajutor' si deschidem o investigatie.".format(oid, status_ro, data, tracking)
+                             "Daca tot nu il gasiti, apasati butonul de mai jos pentru a contacta un agent.".format(oid, status_ro, data, tracking)
                     )
                 elif status == "shipped":
                     dispatcher.utter_message(
                         text="Comanda #{}\nStatus: {} \U0001f69a\nData estimata livrare: {}\nCod tracking: {}\n\n"
-                             "Comanda este pe drum.\nDaca termenul trece fara livrare, scrieti 'problema livrare'.".format(oid, status_ro, data, tracking)
+                             "Comanda este pe drum.\nDaca termenul a trecut fara livrare, apasati butonul de mai jos pentru a contacta un agent.".format(oid, status_ro, data, tracking)
                     )
                 elif status == "processing":
                     dispatcher.utter_message(
@@ -486,55 +491,218 @@ class ActionRecommendProduct(Action):
         return "action_recommend_product"
 
     CATEGORY_MAP = {
-        'ceas': 'smartwatch', 'smartwatch': 'smartwatch',
-        'telefon': 'telefoane', 'smartphone': 'telefoane',
-        'laptop': 'laptopuri', 'notebook': 'laptopuri',
-        'televizor': 'televizoare', 'tv': 'televizoare',
-        'tableta': 'tablete', 'ipad': 'tablete',
+        'cafetiera': 'electrocasnice mici',
+        'espressor': 'electrocasnice mici',
+        'blender': 'electrocasnice mici',
+        'mixer': 'electrocasnice mici',
+        'fierbator': 'electrocasnice mici',
+        'prajitor': 'electrocasnice mici',
+        'friteuza': 'electrocasnice mici',
         'aspirator': 'electrocasnice mici',
-        'frigider': 'electrocasnice mari', 'masina de spalat': 'electrocasnice mari',
-        'casti': 'audio', 'boxa': 'audio', 'speaker': 'audio',
-        'gaming': 'gaming', 'consola': 'gaming',
+        'fier de calcat': 'electrocasnice mici',
+        'telefon': 'telefoane',
+        'smartphone': 'telefoane',
+        'iphone': 'telefoane',
+        'laptop': 'laptopuri',
+        'notebook': 'laptopuri',
+        'macbook': 'laptopuri',
+        'televizor': 'televizoare',
+        'tv': 'televizoare',
+        'frigider': 'electrocasnice mari',
+        'masina de spalat': 'electrocasnice mari',
+        'cuptor': 'electrocasnice mari',
+        'plita': 'electrocasnice mari',
+        'tableta': 'tablete',
+        'ipad': 'tablete',
+        'smartwatch': 'smartwatch',
+        'ceas inteligent': 'smartwatch',
+        'casti': 'audio',
+        'boxa': 'audio',
+        'speaker': 'audio',
+        'soundbar': 'audio',
         'monitor': 'monitoare',
-        'cafetiera': 'electrocasnice mici', 'espressor': 'electrocasnice mici',
-        'camera': 'foto-video', 'foto': 'foto-video', 'drona': 'foto-video',
+        'gaming': 'gaming',
+        'consola': 'gaming',
+        'playstation': 'gaming',
+        'xbox': 'gaming',
+        'nintendo': 'gaming',
+        'camera': 'foto-video',
+        'drona': 'foto-video',
+        'router': 'retea',
+        'ssd': 'stocare',
+        'hdd': 'stocare',
+        'aer conditionat': 'climatizare',
+        'incarcator': 'accesorii',
+        'husa': 'accesorii',
+        'powerbank': 'accesorii',
+        'aparat de ras': 'ingrijire personala',
+        'epilator': 'ingrijire personala',
+        'uscator': 'ingrijire personala',
     }
+
+    # keywords generice — cauta dupa categorie, nu dupa nume
+    GENERIC_KEYWORDS = {
+        'gaming', 'telefon', 'smartphone', 'laptop', 'notebook',
+        'televizor', 'tv', 'tableta', 'smartwatch', 'monitor',
+        'casti', 'boxa', 'speaker', 'router', 'ssd', 'hdd',
+        'camera', 'consola', 'frigider', 'aspirator',
+    }
+
+    BRAND_KEYWORDS = [
+        'apple', 'samsung', 'sony', 'lg', 'philips', 'bosch',
+        'xiaomi', 'huawei', 'dell', 'hp', 'asus', 'lenovo',
+        'dyson', 'nespresso', 'delonghi', 'gorenje', 'indesit',
+        'whirlpool', 'beko', 'nokia', 'oppo', 'realme',
+        'toshiba', 'panasonic', 'acer', 'msi', 'razer',
+        'jbl', 'bose', 'harman', 'logitech', 'corsair',
+    ]
 
     def run(self, dispatcher, tracker, domain):
         last_message = tracker.latest_message.get("text", "").lower()
-        detected_category = None
-        for keyword, category in self.CATEGORY_MAP.items():
-            if keyword in last_message:
-                detected_category = category
+
+        # detecteaza brand
+        detected_brand = None
+        for brand in self.BRAND_KEYWORDS:
+            if brand in last_message:
+                detected_brand = brand
                 break
+
+        # detecteaza categoria si keyword-ul original
+        detected_category = None
+        detected_keyword = None
+        for kw, cat in self.CATEGORY_MAP.items():
+            if kw in last_message:
+                detected_category = cat
+                detected_keyword = kw
+                break
+
+        # detecteaza pret maxim — "sub 500 RON" sau "sub 500"
+        price_match = re.search(
+            r'sub\s+(\d+)\s*(?:ron|lei)?', last_message, re.IGNORECASE
+        )
+        max_price = float(price_match.group(1)) if price_match else None
+
+        # detecteaza pret minim — "peste 1000 RON"
+        price_min_match = re.search(
+            r'peste\s+(\d+)\s*(?:ron|lei)?', last_message, re.IGNORECASE
+        )
+        min_price = float(price_min_match.group(1)) if price_min_match else None
+
         try:
             conn = get_db_connection()
             cur = conn.cursor()
-            if detected_category:
-                cur.execute("""
-                    SELECT product_name, price, stock_status FROM products
-                    WHERE category = %s AND stock_status = 'instock'
-                    ORDER BY price DESC LIMIT 3
-                """, (detected_category,))
-            else:
-                cur.execute("""
-                    SELECT product_name, price, stock_status FROM products
-                    WHERE stock_status = 'instock' ORDER BY price DESC LIMIT 3
-                """)
+
+            conditions = ["stock_status = 'instock'"]
+            params = []
+
+            if detected_brand:
+                # cauta dupa brand in numele produsului
+                conditions.append("LOWER(product_name) LIKE LOWER(%s)")
+                params.append("%" + detected_brand + "%")
+            elif detected_keyword:
+                if detected_keyword in self.GENERIC_KEYWORDS:
+                    # keyword generic -> cauta dupa categorie
+                    conditions.append("category = %s")
+                    params.append(detected_category)
+                else:
+                    # keyword specific (cafetiera, espressor etc) ->
+                    # cauta dupa nume produs ca sa nu intoarca toata categoria
+                    conditions.append("LOWER(product_name) LIKE LOWER(%s)")
+                    params.append("%" + detected_keyword + "%")
+
+            if max_price:
+                conditions.append("price <= %s")
+                params.append(max_price)
+
+            if min_price:
+                conditions.append("price >= %s")
+                params.append(min_price)
+
+            query = (
+                "SELECT product_name, price, category FROM products WHERE "
+                + " AND ".join(conditions)
+                + " ORDER BY price ASC LIMIT 4"
+            )
+
+            cur.execute(query, params)
             rows = cur.fetchall()
             cur.close()
             conn.close()
+
             if rows:
-                mesaj = "Iata cateva produse din categoria '{}':\n\n".format(detected_category) if detected_category else "Iata cateva produse disponibile:\n\n"
+                if detected_brand:
+                    mesaj = "Produse din gama {} disponibile".format(
+                        detected_brand.capitalize()
+                    )
+                elif detected_keyword:
+                    mesaj = "Produse '{}' disponibile".format(detected_keyword)
+                else:
+                    mesaj = "Produse disponibile"
+
+                if max_price:
+                    mesaj += " sub {} RON".format(int(max_price))
+                if min_price:
+                    mesaj += " peste {} RON".format(int(min_price))
+                mesaj += ":\n\n"
+
                 for i, row in enumerate(rows, 1):
-                    pret = "{:.2f} RON".format(float(row[1])) if row[1] else "Pret indisponibil"
-                    mesaj += "{}. {} - {}\n".format(i, row[0], pret)
-                mesaj += "\nPuteti cauta mai multe produse direct pe pagina."
+                    mesaj += "{}. {} - {:.0f} RON\n".format(
+                        i, row[0], float(row[1])
+                    )
+                mesaj += "\nPentru mai multe detalii vizitati pagina produsului pe site."
                 dispatcher.utter_message(text=mesaj)
+
             else:
-                dispatcher.utter_message(text="Nu am gasit produse disponibile in aceasta categorie momentan.")
-        except Exception:
-            dispatcher.utter_message(text="Nu pot accesa catalogul in acest moment. Incercati sa cautati direct pe pagina.")
+                # daca nu gaseste dupa nume specific, incearca dupa categorie ca fallback
+                if detected_keyword and detected_keyword not in self.GENERIC_KEYWORDS:
+                    try:
+                        conn2 = get_db_connection()
+                        cur2 = conn2.cursor()
+                        fallback_conditions = [
+                            "stock_status = 'instock'",
+                            "category = %s"
+                        ]
+                        fallback_params = [detected_category]
+                        if max_price:
+                            fallback_conditions.append("price <= %s")
+                            fallback_params.append(max_price)
+                        fallback_query = (
+                            "SELECT product_name, price, category FROM products WHERE "
+                            + " AND ".join(fallback_conditions)
+                            + " ORDER BY price ASC LIMIT 4"
+                        )
+                        cur2.execute(fallback_query, fallback_params)
+                        fallback_rows = cur2.fetchall()
+                        cur2.close()
+                        conn2.close()
+
+                        if fallback_rows:
+                            mesaj = "Nu am gasit '{}' exact, dar in categoria '{}' am:\n\n".format(
+                                detected_keyword, detected_category
+                            )
+                            for i, row in enumerate(fallback_rows, 1):
+                                mesaj += "{}. {} - {:.0f} RON\n".format(
+                                    i, row[0], float(row[1])
+                                )
+                            mesaj += "\nPentru mai multe detalii vizitati pagina produsului pe site."
+                            dispatcher.utter_message(text=mesaj)
+                            return []
+                    except Exception:
+                        pass
+
+                dispatcher.utter_message(
+                    text="Nu am gasit produse disponibile pentru cautarea ta"
+                         + (" sub {} RON".format(int(max_price)) if max_price else "")
+                         + ".\nIncearca alte criterii sau cauta direct pe site."
+                )
+
+        except Exception as e:
+            print("[RecommendProduct] Eroare: {}".format(e))
+            dispatcher.utter_message(
+                text="Nu pot accesa catalogul momentan. "
+                     "Cautati direct pe pagina site-ului."
+            )
+
         return []
 
 
@@ -665,16 +833,31 @@ class ActionFallbackLLM(Action):
                 conditions = ["stock_status = 'instock'"]
                 params = []
 
-                if detected_category:
-                    conditions.append("category = %s")
-                    params.append(detected_category)
-                elif search_terms:
-                    # cauta in numele produsului dupa primul termen relevant
+                # prioritate: cauta in NUMELE produsului daca avem termeni specifici
+                # categoria e doar fallback cand nu gasim dupa nume
+                name_search_terms = []
+                for term in search_terms:
+                    # ignora termene generice care nu sunt nume de produs
+                    generic_terms = {'recomanda', 'cafetiera', 'espressor', 'televizor',
+                                    'telefon', 'laptop', 'tableta', 'monitor', 'aspirator'}
+                    if term not in generic_terms and len(term) > 3:
+                        name_search_terms.append(term)
+
+                if name_search_terms:
+                    # cauta dupa termeni specifici in numele produsului
                     term_conditions = []
-                    for term in search_terms[:2]:
+                    for term in name_search_terms[:3]:
                         term_conditions.append("LOWER(product_name) LIKE LOWER(%s)")
                         params.append("%" + term + "%")
                     conditions.append("(" + " OR ".join(term_conditions) + ")")
+                elif detected_category:
+                    # fallback: cauta dupa categorie + cuvant cheie din mesaj
+                    conditions.append("category = %s")
+                    params.append(detected_category)
+                    # adauga si cautare in nume dupa primul keyword relevant
+                    for term in search_terms[:1]:
+                        conditions.append("LOWER(product_name) LIKE LOWER(%s)")
+                        params.append("%" + term + "%")
 
                 if max_price:
                     conditions.append("price <= %s")

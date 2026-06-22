@@ -18,7 +18,7 @@ from rasa_sdk.types import DomainDict
 
 def get_db_connection():
     return psycopg2.connect(
-        "postgresql://postgres:postgres123.@db.edpxrivqoveheytqsxlo.supabase.co:5432/postgres"
+        "postgresql://postgres.edpxrivqoveheytqsxlo:postgres123.@aws-1-eu-central-2.pooler.supabase.com:5432/postgres"
     )
 
 def normalize_order_id(value: str) -> str:

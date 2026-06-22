@@ -17,7 +17,7 @@ CORS(app)
 
 def get_db_connection():
     return psycopg2.connect(
-        "postgresql://postgres:postgres123.@db.edpxrivqoveheytqsxlo.supabase.co:5432/postgres"
+        "postgresql://postgres.edpxrivqoveheytqsxlo:postgres123.@aws-1-eu-central-2.pooler.supabase.com:5432/postgres"
     )
 
 @app.route("/api/products", methods=["GET"])
@@ -29,7 +29,7 @@ def get_products():
     offset   = (page - 1) * limit
 
     try:
-        conn = get_db()
+        conn = get_db_connection()
         cur  = conn.cursor()
 
         query  = "SELECT product_id, product_name, category, price, stock_status, description FROM products WHERE 1=1"
@@ -75,7 +75,7 @@ def get_products():
 @app.route("/api/categories", methods=["GET"])
 def get_categories():
     try:
-        conn = get_db()
+        conn = get_db_connection()
         cur  = conn.cursor()
         cur.execute("SELECT DISTINCT category FROM products ORDER BY category")
         rows = cur.fetchall()
@@ -89,7 +89,7 @@ def get_categories():
 @app.route("/api/products/<product_id>", methods=["GET"])
 def get_product(product_id):
     try:
-        conn = get_db()
+        conn = get_db_connection()
         cur  = conn.cursor()
         cur.execute("""
             SELECT product_id, product_name, category, price, stock_status, description

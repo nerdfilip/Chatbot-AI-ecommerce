@@ -31,8 +31,12 @@ export const sendMessage = async (text, onMessage) => {
 
     const messages = await response.json();
     messages.forEach(msg => {
-      if (msg.text) {
-        onMessage({ text: msg.text, sender: 'bot' });
+      if (msg.text || (msg.buttons && msg.buttons.length)) {
+        onMessage({
+          text: msg.text || '',
+          buttons: msg.buttons || [],
+          sender: 'bot'
+        });
       }
     });
   } catch (err) {

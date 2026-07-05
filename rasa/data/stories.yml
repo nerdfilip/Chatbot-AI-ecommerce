@@ -17,9 +17,6 @@ stories:
     - intent: greet
     - action: utter_greet
     - intent: return_request
-    - action: return_form
-    - active_loop: return_form
-    - active_loop: null
     - action: action_initiate_return
 
 - story: problema livrare
@@ -67,9 +64,6 @@ stories:
     - active_loop: null
     - action: action_track_order
     - intent: return_request
-    - action: return_form
-    - active_loop: return_form
-    - active_loop: null
     - action: action_initiate_return
 
 - story: tracking urmat de problema livrare
@@ -92,9 +86,6 @@ stories:
     - active_loop: null
     - action: action_track_order
     - intent: return_request
-    - action: return_form
-    - active_loop: return_form
-    - active_loop: null
     - action: action_initiate_return
 
 - story: tracking urmat de problema livrare
@@ -115,9 +106,6 @@ stories:
     - active_loop: null
     - action: action_track_order
     - intent: return_request
-    - action: return_form
-    - active_loop: return_form
-    - active_loop: null
     - action: action_initiate_return
 
 - story: tracking urmat de escaladare

@@ -1,11 +1,28 @@
 import os
 import re
+import logging
 import psycopg2
 from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker, FormValidationAction
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet, FollowupAction
 from rasa_sdk.types import DomainDict
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(name)s | %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler("sql_queries.log"),
+    ],
+)
+logger = logging.getLogger(__name__)
+
+
+def run_query(cursor, query, params=()):
+    logger.info(f"[SQL] {query} | params: {params}")
+    cursor.execute(query, params)
+    return cursor
 
 # def get_db_connection():
 #     return psycopg2.connect(
@@ -76,7 +93,7 @@ class ValidateOrderForm(FormValidationAction):
             try:
                 conn = get_db_connection()
                 cur = conn.cursor()
-                cur.execute("SELECT order_id FROM orders WHERE order_id = %s", (candidate,))
+                run_query(cur, "SELECT order_id FROM orders WHERE order_id = %s", (candidate,))
                 row = cur.fetchone()
                 cur.close()
                 conn.close()
@@ -172,9 +189,9 @@ class ActionTrackOrder(Action):
             conn = get_db_connection()
             cur = conn.cursor()
             if order_id:
-                cur.execute("SELECT order_id, status, estimated_delivery, tracking_code FROM orders WHERE order_id = %s", (order_id,))
+                run_query(cur, "SELECT order_id, status, estimated_delivery, tracking_code FROM orders WHERE order_id = %s", (order_id,))
             else:
-                cur.execute("""
+                run_query(cur, """
                     SELECT o.order_id, o.status, o.estimated_delivery, o.tracking_code
                     FROM orders o JOIN customers c ON o.customer_id = c.customer_id
                     WHERE c.email = %s ORDER BY o.order_date DESC LIMIT 1
@@ -232,6 +249,7 @@ class ActionTrackOrder(Action):
                     dispatcher.utter_message(
                         text="Comanda #{}\nStatus: {}\nData estimata livrare: {}\nCod tracking: {}".format(oid, status_ro, data, tracking)
                     )
+                return [SlotSet("order_id", oid)]
             else:
                 dispatcher.utter_message(
                     text="Nu am gasit comanda #{}.\n\nVerificati ca:\n- Numarul comenzii e corect (ex: ORD017)\n- Sau furnizati emailul cu care ati plasat comanda".format(order_id)
@@ -248,38 +266,86 @@ class ActionInitiateReturn(Action):
         return "action_initiate_return"
 
     def run(self, dispatcher, tracker, domain):
-        order_id = tracker.get_slot("order_id")
-        if order_id:
-            order_id = normalize_order_id(order_id)
+        latest_text = tracker.latest_message.get("text", "")
+        latest_intent = tracker.latest_message.get("intent", {}).get("name")
+        match = re.search(r'\b(ORD\d+|[a-f0-9]{32}|\d{2,})\b', latest_text, re.IGNORECASE)
+
+        order_id = normalize_order_id(match.group()) if match else None
+        slot_order_id = tracker.get_slot("order_id")
+        if slot_order_id:
+            slot_order_id = normalize_order_id(slot_order_id)
+
+        confirmation_pending = bool(tracker.get_slot("return_confirmation_pending"))
+
+        if latest_intent == "deny" and confirmation_pending:
+            dispatcher.utter_message(
+                text="Sigur. Va rog sa imi furnizati numarul comenzii pentru care doriti retur (ex: ORD017 sau 017)."
+            )
+            return [
+                SlotSet("order_id", None),
+                SlotSet("return_confirmation_pending", False),
+                FollowupAction("return_form"),
+            ]
+
+        if latest_intent == "return_request" and slot_order_id and not order_id:
+            dispatcher.utter_message(
+                text=f"Doriti sa initiati un retur pentru comanda #{slot_order_id}?",
+                buttons=[
+                    {"title": "Da", "payload": "/affirm"},
+                    {"title": "Nu", "payload": "/deny"},
+                ],
+            )
+            return [SlotSet("return_confirmation_pending", True)]
+
+        if latest_intent == "return_request" and not slot_order_id and not order_id:
+            dispatcher.utter_message(
+                text="Pentru a initia un retur am nevoie de numarul comenzii. Va rog furnizati-l (ex: ORD017 sau 017)."
+            )
+            return [SlotSet("return_confirmation_pending", False), FollowupAction("return_form")]
+
+        if latest_intent == "affirm" and confirmation_pending and slot_order_id:
+            order_id = slot_order_id
+
         if not order_id:
-            for event in reversed(list(tracker.events)):
-                if event.get("event") == "slot" and event.get("name") == "order_id":
-                    order_id = event.get("value")
-                    break
+            order_id = slot_order_id
+
         if not order_id:
-            dispatcher.utter_message(text="Pentru a initia un retur am nevoie de numarul comenzii. Va rog furnizati-l (ex: ORD017 sau 017).")
-            return []
+            dispatcher.utter_message(
+                text="Pentru a initia un retur am nevoie de numarul comenzii. Va rog furnizati-l (ex: ORD017 sau 017)."
+            )
+            return [SlotSet("return_confirmation_pending", False), FollowupAction("return_form")]
+
         try:
             conn = get_db_connection()
             cur = conn.cursor()
-            cur.execute("SELECT order_id, status FROM orders WHERE order_id = %s", (order_id,))
+            run_query(cur, "SELECT order_id, status FROM orders WHERE order_id = %s", (order_id,))
             row = cur.fetchone()
-            cur.close()
-            conn.close()
+
             if row and row[1] == "delivered":
+                run_query(
+                    cur,
+                    "INSERT INTO returns (order_id, reason, status, created_at) VALUES (%s, %s, 'pending', NOW())",
+                    (order_id, "initiated_via_chatbot"),
+                )
+                conn.commit()
                 dispatcher.utter_message(
                     text="Am inregistrat cererea de retur pentru comanda #{}.\n"
                          "Veti primi un email cu eticheta de retur in 24 de ore.\n"
                          "Produsul trebuie trimis in termen de 14 zile.\n"
                          "Transportul la retur este GRATUIT.".format(order_id)
                 )
+                cur.close()
+                conn.close()
+                return [SlotSet("return_confirmation_pending", False)]
             elif row:
                 dispatcher.utter_message(text="Comanda #{} are statusul '{}' si nu poate fi returnata momentan.\nReturul este disponibil doar pentru comenzile livrate.".format(order_id, row[1]))
             else:
                 dispatcher.utter_message(text="Nu am gasit comanda #{}. Verificati numarul comenzii.".format(order_id))
+            cur.close()
+            conn.close()
         except Exception:
             dispatcher.utter_message(text="A aparut o eroare la procesarea returului. Va transfer catre un agent uman.")
-        return []
+        return [SlotSet("return_confirmation_pending", False)]
 
 
 class ActionCancelOrder(Action):
@@ -304,7 +370,7 @@ class ActionCancelOrder(Action):
         try:
             conn = get_db_connection()
             cur = conn.cursor()
-            cur.execute("SELECT order_id, status FROM orders WHERE order_id = %s", (order_id,))
+            run_query(cur, "SELECT order_id, status FROM orders WHERE order_id = %s", (order_id,))
             row = cur.fetchone()
             if not row:
                 dispatcher.utter_message(text="Nu am gasit comanda #{}. Verificati numarul comenzii.".format(order_id))
@@ -313,7 +379,7 @@ class ActionCancelOrder(Action):
                 return []
             status = row[1]
             if status in ("processing", "invoiced"):
-                cur.execute("UPDATE orders SET status = 'canceled' WHERE order_id = %s", (order_id,))
+                run_query(cur, "UPDATE orders SET status = 'canceled' WHERE order_id = %s", (order_id,))
                 conn.commit()
                 cur.close()
                 conn.close()
@@ -356,7 +422,7 @@ class ActionCheckStock(Action):
             conn = get_db_connection()
             cur = conn.cursor()
             if product_name:
-                cur.execute("""
+                run_query(cur, """
                     SELECT product_name, stock_status, category, price FROM products
                     WHERE LOWER(product_name) LIKE LOWER(%s) LIMIT 3
                 """, ("%{}%".format(product_name),))
@@ -397,7 +463,7 @@ class ActionDeliveryHelp(Action):
             try:
                 conn = get_db_connection()
                 cur = conn.cursor()
-                cur.execute("SELECT order_id, status, estimated_delivery, tracking_code FROM orders WHERE order_id = %s", (order_id,))
+                run_query(cur, "SELECT order_id, status, estimated_delivery, tracking_code FROM orders WHERE order_id = %s", (order_id,))
                 row = cur.fetchone()
                 cur.close()
                 conn.close()
@@ -439,7 +505,7 @@ class ActionWarrantyInfo(Action):
         try:
             conn = get_db_connection()
             cur = conn.cursor()
-            cur.execute("SELECT answer FROM faq_entries WHERE category = 'garantie' ORDER BY id LIMIT 1")
+            run_query(cur, "SELECT answer FROM faq_entries WHERE category = 'garantie' ORDER BY id LIMIT 1")
             row = cur.fetchone()
             cur.close()
             conn.close()
@@ -624,7 +690,7 @@ class ActionRecommendProduct(Action):
                 + " ORDER BY price ASC LIMIT 4"
             )
 
-            cur.execute(query, params)
+            run_query(cur, query, params)
             rows = cur.fetchall()
             cur.close()
             conn.close()
@@ -671,7 +737,7 @@ class ActionRecommendProduct(Action):
                             + " AND ".join(fallback_conditions)
                             + " ORDER BY price ASC LIMIT 4"
                         )
-                        cur2.execute(fallback_query, fallback_params)
+                        run_query(cur2, fallback_query, fallback_params)
                         fallback_rows = cur2.fetchall()
                         cur2.close()
                         conn2.close()
@@ -873,7 +939,7 @@ class ActionFallbackLLM(Action):
                     " ORDER BY price ASC LIMIT 4"
                 )
 
-                cur.execute(query, params)
+                run_query(cur, query, params)
                 rows = cur.fetchall()
                 cur.close()
                 conn.close()

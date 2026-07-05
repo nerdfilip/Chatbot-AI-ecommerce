@@ -184,6 +184,19 @@ const ChatWidget = () => {
                   {msg.sender === 'bot' && <div style={S.botAv}>A</div>}
                   <div style={{ ...S.bubble, ...(msg.sender === 'user' ? S.userB : S.botB) }}>
                     <span style={{ whiteSpace: 'pre-line', lineHeight: 1.55 }}>{msg.text}</span>
+                    {msg.sender === 'bot' && Array.isArray(msg.buttons) && msg.buttons.length > 0 && (
+                      <div style={S.rasaButtonsWrap}>
+                        {msg.buttons.map((button, index) => (
+                          <button
+                            key={`${msg.id}_${index}`}
+                            style={S.rasaButton}
+                            onClick={() => handleSend(button.payload || button.title || '')}
+                          >
+                            {button.title || button.payload}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <span style={S.ts}>{msg.time}</span>
                   </div>
                 </div>
@@ -473,6 +486,23 @@ const S = {
     background: 'white', color: '#475569', border: '1.5px solid #e2e8f0',
     fontSize: '14px', fontWeight: '600', cursor: 'pointer',
     fontFamily: "'Outfit', sans-serif", transition: 'opacity 0.15s',
+  },
+  rasaButtonsWrap: {
+    display: 'flex',
+    gap: '6px',
+    flexWrap: 'wrap',
+    marginTop: '4px',
+  },
+  rasaButton: {
+    padding: '6px 11px',
+    borderRadius: '10px',
+    border: '1px solid #cbd5e1',
+    background: '#f8fafc',
+    color: '#0f172a',
+    fontSize: '12px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontFamily: "'Outfit', sans-serif",
   },
   // QUICK REPLIES
   qrWrap: {

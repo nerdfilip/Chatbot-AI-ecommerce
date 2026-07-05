@@ -41,11 +41,10 @@ rules:
     - active_loop: null
     - action: action_track_order
 
-- rule: activare return form
+- rule: pornire flux retur
   steps:
     - intent: return_request
-    - action: return_form
-    - active_loop: return_form
+    - action: action_initiate_return
 
 - rule: submit return form
   condition:
@@ -53,6 +52,22 @@ rules:
   steps:
     - action: return_form
     - active_loop: null
+    - action: action_initiate_return
+
+- rule: confirmare retur - da
+  condition:
+    - slot_was_set:
+        - return_confirmation_pending: true
+  steps:
+    - intent: affirm
+    - action: action_initiate_return
+
+- rule: confirmare retur - nu
+  condition:
+    - slot_was_set:
+        - return_confirmation_pending: true
+  steps:
+    - intent: deny
     - action: action_initiate_return
 
 - rule: activare product form

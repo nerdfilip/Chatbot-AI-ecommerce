@@ -37,6 +37,14 @@ slots:
         conditions:
           - active_loop: order_form
             requested_slot: order_id
+          - active_loop: return_form
+            requested_slot: order_id
+
+  return_confirmation_pending:
+    type: bool
+    influence_conversation: false
+    mappings:
+      - type: custom
 
   email:
     type: text

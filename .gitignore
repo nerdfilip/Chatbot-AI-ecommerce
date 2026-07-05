@@ -16,6 +16,7 @@ frontend/build/
 # Environment
 .env
 *.env
+sql_queries.log
 
 # OS
 .DS_Store
